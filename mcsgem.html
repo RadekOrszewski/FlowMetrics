@@ -1,1 +1,341 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symulacja Monte Carlo - Agile Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --bg-color: #f4f7f6;
+            --panel-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        .panel {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 { color: var(--primary-color); }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .result-card {
+            background: #e9f2fb;
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .result-card h4 { margin: 0 0 10px 0; font-size: 1em; }
+        .result-card p { margin: 0; font-size: 1.2em; font-weight: bold; }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
 
+    <div class="container">
+        <div class="panel">
+            <h2>Parametry</h2>
+            
+            <div class="form-group">
+                <label for="backlog">Rozmiar Backlogu (liczba elementów):</label>
+                <input type="number" id="backlog" value="42">
+            </div>
+
+            <div class="form-group">
+                <label for="partialTarget">Jaka część backlogu do analizy pośredniej? (%):</label>
+                <input type="number" id="partialTarget" value="85">
+            </div>
+
+            <div class="form-group">
+                <label for="throughput">Przepustowość (elementy per Sprint, po przecinku):</label>
+                <input type="text" id="throughput" value="5, 4, 4, 5, 6, 4, 2, 3, 2, 5, 6">
+            </div>
+
+            <div class="form-group">
+                <label for="sprintDays">Długość Sprintu (w dniach):</label>
+                <input type="number" id="sprintDays" value="14">
+            </div>
+
+            <div class="form-group">
+                <label for="startDate">Data startu prac:</label>
+                <input type="date" id="startDate" value="2026-05-01">
+            </div>
+
+            <div class="form-group">
+                <label for="targetDate">Data końcowa (cel czasowy):</label>
+                <input type="date" id="targetDate" value="2026-09-30">
+            </div>
+
+            <div class="form-group">
+                <label for="confidence">Pewność prognozy (poziom ufności %):</label>
+                <input type="number" id="confidence" value="85">
+            </div>
+
+            <button onclick="runSimulation()">Uruchom Symulację</button>
+        </div>
+
+        <div class="panel">
+            <h2>Wyniki Prognozy</h2>
+            
+            <div class="results-grid">
+                <div class="result-card">
+                    <h4 id="partialBacklogTitle">Ukończenie 85% Backlogu</h4>
+                    <p id="resPartialDate">---</p>
+                    <small id="resPartialSprints">Potrzebne sprinty: ---</small>
+                </div>
+                
+                <div class="result-card">
+                    <h4>Ukończenie 100% Backlogu</h4>
+                    <p id="resTotalDate">---</p>
+                    <small id="resTotalSprints">Potrzebne sprinty: ---</small>
+                </div>
+
+                <div class="result-card">
+                    <h4>Dowiezione do daty docelowej</h4>
+                    <p id="resItemsTarget">--- elementów</p>
+                    <small id="resAvailableSprints">Dostępne sprinty: ---</small>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="chartSprints"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartItems"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartSprintsInstance = null;
+        let chartItemsInstance = null;
+
+        // Pomocnicza funkcja do obliczania percentyli
+        function getPercentile(arr, p) {
+            arr.sort((a, b) => a - b);
+            const index = Math.ceil((p / 100) * arr.length) - 1;
+            return arr[index];
+        }
+
+        function runSimulation() {
+            // Pobieranie danych wejściowych
+            const backlog = parseInt(document.getElementById('backlog').value, 10);
+            const partialPercent = parseInt(document.getElementById('partialTarget').value, 10);
+            const partialBacklog = Math.ceil(backlog * (partialPercent / 100));
+            const throughputStr = document.getElementById('throughput').value;
+            const throughput = throughputStr.split(',').map(n => parseInt(n.trim(), 10)).filter(n => !isNaN(n));
+            const sprintDays = parseInt(document.getElementById('sprintDays').value, 10);
+            const startDate = new Date(document.getElementById('startDate').value);
+            const targetDate = new Date(document.getElementById('targetDate').value);
+            const confidence = parseInt(document.getElementById('confidence').value, 10);
+
+            if(throughput.length === 0) {
+                alert("Wprowadź prawidłowe dane przepustowości!");
+                return;
+            }
+
+            // Obliczenia czasowe
+            const daysAvailable = Math.floor((targetDate - startDate) / (1000 * 60 * 60 * 24));
+            const sprintsAvailable = Math.max(0, Math.floor(daysAvailable / sprintDays));
+
+            const iterations = 10000;
+            let sprintsForPartial = [];
+            let sprintsForTotal = [];
+            let itemsByTarget = [];
+
+            // Pętla Monte Carlo
+            for(let i=0; i<iterations; i++) {
+                // Symulacja dla zakresu
+                let items = 0;
+                let sprints = 0;
+                let sprintsPartial = 0;
+                
+                while (items < backlog) {
+                    sprints++;
+                    items += throughput[Math.floor(Math.random() * throughput.length)];
+                    if (items >= partialBacklog && sprintsPartial === 0) {
+                        sprintsPartial = sprints;
+                    }
+                }
+                sprintsForPartial.push(sprintsPartial);
+                sprintsForTotal.push(sprints);
+
+                // Symulacja dla stałej daty
+                let itemsTarget = 0;
+                for(let s=0; s<sprintsAvailable; s++) {
+                    itemsTarget += throughput[Math.floor(Math.random() * throughput.length)];
+                }
+                itemsByTarget.push(itemsTarget);
+            }
+
+            // Obliczanie wartości docelowych (percentyli)
+            const pSprintsTotal = getPercentile(sprintsForTotal, confidence);
+            const pSprintsPartial = getPercentile(sprintsForPartial, confidence);
+            // Dla ilości elementów chcemy mieć pewność, że zrobimy "CO NAJMNIEJ" X.
+            // Zatem szukamy dolnego percentyla (np. 15 percentyl dla 85% pewności).
+            const pItemsTarget = getPercentile(itemsByTarget, 100 - confidence);
+
+            // Obliczanie dat
+            const calcDate = (sprints) => {
+                let d = new Date(startDate);
+                d.setDate(d.getDate() + (sprints * sprintDays));
+                return d.toISOString().split('T')[0];
+            };
+
+            // Aktualizacja DOM
+            document.getElementById('partialBacklogTitle').innerText = `Ukończenie ${partialPercent}% Backlogu (${partialBacklog} el.)`;
+            document.getElementById('resPartialDate').innerText = calcDate(pSprintsPartial);
+            document.getElementById('resPartialSprints').innerText = `Potrzebne sprinty: ${pSprintsPartial}`;
+
+            document.getElementById('resTotalDate').innerText = calcDate(pSprintsTotal);
+            document.getElementById('resTotalSprints').innerText = `Potrzebne sprinty: ${pSprintsTotal}`;
+
+            document.getElementById('resItemsTarget').innerText = `Min. ${pItemsTarget} elementów`;
+            document.getElementById('resAvailableSprints').innerText = `Dostępne sprinty do celu: ${sprintsAvailable}`;
+
+            // Rysowanie wykresów
+            drawCharts(sprintsForTotal, pSprintsTotal, itemsByTarget, pItemsTarget, confidence);
+        }
+
+        function drawCharts(sprintsData, pSprints, itemsData, pItems, confidence) {
+            // Zliczanie częstotliwości dla wykresów
+            const countFreq = (arr) => {
+                const counts = {};
+                arr.forEach(x => { counts[x] = (counts[x] || 0) + 1; });
+                return counts;
+            };
+
+            const sprintsFreq = countFreq(sprintsData);
+            const itemsFreq = countFreq(itemsData);
+
+            // Przygotowanie danych Chart.js
+            const sprintsLabels = Object.keys(sprintsFreq).map(Number).sort((a,b)=>a-b);
+            const sprintsValues = sprintsLabels.map(k => sprintsFreq[k]);
+            
+            // Kolorowanie: wszystko do wartości percentyla (włącznie) na jeden kolor, reszta na inny
+            const sprintsColors = sprintsLabels.map(l => l <= pSprints ? '#0056b3' : '#ccc');
+
+            const itemsLabels = Object.keys(itemsFreq).map(Number).sort((a,b)=>a-b);
+            const itemsValues = itemsLabels.map(k => itemsFreq[k]);
+            // Kolorowanie dla elementów: wszystko OD percentyla w górę na jeden kolor (bo dowieziemy >= pItems)
+            const itemsColors = itemsLabels.map(l => l >= pItems ? '#28a745' : '#ccc');
+
+            // Niszczenie starych instancji wykresów, by uniknąć nakładania się
+            if(chartSprintsInstance) chartSprintsInstance.destroy();
+            if(chartItemsInstance) chartItemsInstance.destroy();
+
+            const ctxSprints = document.getElementById('chartSprints').getContext('2d');
+            chartSprintsInstance = new Chart(ctxSprints, {
+                type: 'bar',
+                data: {
+                    labels: sprintsLabels,
+                    datasets: [{
+                        label: 'Liczba symulacji',
+                        data: sprintsValues,
+                        backgroundColor: sprintsColors,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: `Rozkład Sprintów dla 100% Backlogu (Pewność ${confidence}% dla <= ${pSprints} Sprintów)` },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Liczba Sprintów' } },
+                        y: { title: { display: true, text: 'Częstotliwość wystąpień' } }
+                    }
+                }
+            });
+
+            const ctxItems = document.getElementById('chartItems').getContext('2d');
+            chartItemsInstance = new Chart(ctxItems, {
+                type: 'bar',
+                data: {
+                    labels: itemsLabels,
+                    datasets: [{
+                        label: 'Liczba symulacji',
+                        data: itemsValues,
+                        backgroundColor: itemsColors,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: `Rozkład dowiezionych elementów na datę docelową (Pewność ${confidence}% dla >= ${pItems} elementów)` },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Dowiezione elementy' } },
+                        y: { title: { display: true, text: 'Częstotliwość wystąpień' } }
+                    }
+                }
+            });
+        }
+
+        // Uruchomienie domyślne po załadowaniu
+        window.onload = runSimulation;
+    </script>
+</body>
+</html>
