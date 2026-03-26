@@ -1,1 +1,584 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XmR Dashboard — Daily Delivery Rate</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2230;
+    --border:    #273044;
+    --text:      #e6edf3;
+    --muted:     #7d8fa9;
+    --accent:    #4493f8;
+    --green:     #2ea043;
+    --greenBr:   #3fb950;
+    --red:       #f85149;
+    --amber:     #e3b341;
+    --orange:    #db6d28;
+    --purple:    #bc8cff;
+    --teal:      #39d353;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .hdr-left { display: flex; align-items: center; gap: 14px; }
+  .hdr-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, #1f6feb, #388bfd);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .hdr-title { font-size: 16px; font-weight: 700; letter-spacing: .01em; }
+  .hdr-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .hdr-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface2);
+    white-space: nowrap;
+  }
+  .badge.live { border-color: #2ea04340; background: #2ea04314; color: var(--greenBr); }
+
+  /* ── MAIN LAYOUT ── */
+  main { padding: 22px 28px; max-width: 1440px; margin: 0 auto; }
+
+  /* ── KPI STRIP ── */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .kpi-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 6px; }
+  .kpi-val { font-size: 22px; font-weight: 700; line-height: 1; }
+  .kpi-val.blue   { color: var(--accent); }
+  .kpi-val.green  { color: var(--greenBr); }
+  .kpi-val.red    { color: var(--red); }
+  .kpi-val.amber  { color: var(--amber); }
+  .kpi-val.purple { color: var(--purple); }
+  .kpi-hint { font-size: 10px; color: var(--muted); margin-top: 5px; }
+
+  /* ── CHARTS ── */
+  .charts-wrap { display: flex; flex-direction: column; gap: 18px; }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px 16px;
+  }
+  .chart-hdr { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .chart-title { font-size: 13px; font-weight: 700; }
+  .chart-meta  { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .chart-canvas { position: relative; height: 240px; }
+
+  .legend-row {
+    display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px;
+    padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); }
+  .leg-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .leg-line { width: 18px; height: 2px; flex-shrink: 0; }
+  .leg-dash { width: 18px; height: 0; border-top: 2px dashed; flex-shrink: 0; }
+
+  /* ── SIGNALS PANEL ── */
+  .signals-section { margin-top: 18px; }
+  .section-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--muted); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .rule-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .rule-head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .rule-num {
+    width: 24px; height: 24px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; flex-shrink: 0;
+  }
+  .rule-name { font-size: 12px; font-weight: 700; }
+  .rule-def  { font-size: 10px; color: var(--muted); margin-top: 2px; line-height: 1.5; }
+  .rule-body { padding: 12px 16px; }
+
+  .chart-label {
+    font-size: 9px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin-bottom: 5px; margin-top: 8px;
+  }
+  .chart-label:first-child { margin-top: 0; }
+
+  .sig-list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+  .sig-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 8px; border-radius: 5px;
+    background: var(--surface2);
+    font-size: 11px;
+  }
+  .sig-date { color: var(--text); font-variant-numeric: tabular-nums; }
+  .sig-val  {
+    font-size: 10px; font-weight: 700; border-radius: 4px;
+    padding: 1px 6px;
+  }
+  .sig-val.xv  { background: #4493f820; color: var(--accent); }
+  .sig-val.mrv { background: #3fb95020; color: var(--greenBr); }
+
+  .no-sig {
+    font-size: 11px; color: var(--greenBr);
+    padding: 5px 0;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .no-sig::before { content: '✓'; }
+
+  /* rule colours */
+  .r1 { --rc: #f85149; }
+  .r2 { --rc: #e3b341; }
+  .r3 { --rc: #db6d28; }
+  .r4 { --rc: #bc8cff; }
+  .rule-num  { background: color-mix(in srgb, var(--rc) 18%, transparent); color: var(--rc); }
+  .rule-head { border-left: 3px solid var(--rc); }
+  .rule-name { color: var(--rc); }
+
+  footer {
+    text-align: center; padding: 18px 20px; color: var(--muted);
+    font-size: 10px; border-top: 1px solid var(--border); margin-top: 28px;
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-left">
+    <div class="hdr-icon">📈</div>
+    <div>
+      <div class="hdr-title">XmR Process Behaviour Chart</div>
+      <div class="hdr-sub">Daily Delivery Rate · Jan 7 – Apr 19, 2025 · 103 observations</div>
+    </div>
+  </div>
+  <div class="hdr-badges">
+    <span class="badge live">● Live data</span>
+    <span class="badge">d₂ = 1.128</span>
+    <span class="badge">D₄ = 3.268</span>
+    <span class="badge">4 Detection Rules</span>
+  </div>
+</header>
+
+<main>
+  <div class="kpi-strip" id="kpiStrip"></div>
+
+  <div class="charts-wrap">
+
+    <div class="chart-card">
+      <div class="chart-hdr">
+        <div>
+          <div class="chart-title">X Chart — Individual Values (Daily Deliveries)</div>
+          <div class="chart-meta">
+            Natural Process Limits = X̄ ± 2.660 × R̄ &nbsp;·&nbsp; Sigma zones at ±1σ̂ and ±2σ̂ &nbsp;·&nbsp; Coloured points indicate detected signals
+          </div>
+        </div>
+      </div>
+      <div class="chart-canvas"><canvas id="xChart"></canvas></div>
+      <div class="legend-row" id="xLeg"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-hdr">
+        <div>
+          <div class="chart-title">mR Chart — Moving Range</div>
+          <div class="chart-meta">
+            Successive absolute differences &nbsp;·&nbsp; Upper Range Limit = D₄ × R̄ = 3.268 × R̄ &nbsp;·&nbsp; Lower limit = 0 (by definition)
+          </div>
+        </div>
+      </div>
+      <div class="chart-canvas"><canvas id="mrChart"></canvas></div>
+      <div class="legend-row" id="mrLeg"></div>
+    </div>
+
+  </div>
+
+  <div class="signals-section">
+    <div class="section-title">Signal Detection — Western Electric Rules</div>
+    <div class="rules-grid" id="rulesGrid"></div>
+  </div>
+</main>
+
+<footer>
+  XmR constants for n = 2 moving range: d₂ = 1.128 · σ̂ = R̄ ÷ d₂ · UNPL = X̄ + 2.660R̄ · LNPL = X̄ − 2.660R̄ (floored at 0) · URL = 3.268 × R̄<br>
+  Sigma zone lines: ±1σ̂ = X̄ ± 0.887R̄ · ±2σ̂ = X̄ ± 1.773R̄ &nbsp;|&nbsp; Signal colours: 🔴 Rule 1 · 🟡 Rule 2 · 🟠 Rule 3 · 🟣 Rule 4
+</footer>
+
+<script>
+// ─────────────────────────────────────────────
+//  DATA
+// ─────────────────────────────────────────────
+const RAW = [{"date":"2025-01-07","value":0},{"date":"2025-01-08","value":2},{"date":"2025-01-09","value":10},{"date":"2025-01-10","value":3},{"date":"2025-01-11","value":0},{"date":"2025-01-12","value":0},{"date":"2025-01-13","value":2},{"date":"2025-01-14","value":3},{"date":"2025-01-15","value":7},{"date":"2025-01-16","value":0},{"date":"2025-01-17","value":0},{"date":"2025-01-18","value":0},{"date":"2025-01-19","value":0},{"date":"2025-01-20","value":5},{"date":"2025-01-21","value":2},{"date":"2025-01-22","value":0},{"date":"2025-01-23","value":0},{"date":"2025-01-24","value":0},{"date":"2025-01-25","value":0},{"date":"2025-01-26","value":0},{"date":"2025-01-27","value":1},{"date":"2025-01-28","value":1},{"date":"2025-01-29","value":0},{"date":"2025-01-30","value":5},{"date":"2025-01-31","value":4},{"date":"2025-02-01","value":0},{"date":"2025-02-02","value":0},{"date":"2025-02-03","value":7},{"date":"2025-02-04","value":0},{"date":"2025-02-05","value":2},{"date":"2025-02-06","value":2},{"date":"2025-02-07","value":12},{"date":"2025-02-08","value":0},{"date":"2025-02-09","value":0},{"date":"2025-02-10","value":1},{"date":"2025-02-11","value":0},{"date":"2025-02-12","value":0},{"date":"2025-02-13","value":2},{"date":"2025-02-14","value":12},{"date":"2025-02-15","value":0},{"date":"2025-02-16","value":0},{"date":"2025-02-17","value":1},{"date":"2025-02-18","value":0},{"date":"2025-02-19","value":0},{"date":"2025-02-20","value":3},{"date":"2025-02-21","value":11},{"date":"2025-02-22","value":0},{"date":"2025-02-23","value":0},{"date":"2025-02-24","value":6},{"date":"2025-02-25","value":0},{"date":"2025-02-26","value":0},{"date":"2025-02-27","value":6},{"date":"2025-02-28","value":7},{"date":"2025-03-01","value":0},{"date":"2025-03-02","value":0},{"date":"2025-03-03","value":2},{"date":"2025-03-04","value":0},{"date":"2025-03-05","value":0},{"date":"2025-03-06","value":3},{"date":"2025-03-07","value":5},{"date":"2025-03-08","value":0},{"date":"2025-03-09","value":0},{"date":"2025-03-10","value":1},{"date":"2025-03-11","value":0},{"date":"2025-03-12","value":0},{"date":"2025-03-13","value":9},{"date":"2025-03-14","value":7},{"date":"2025-03-15","value":0},{"date":"2025-03-16","value":0},{"date":"2025-03-17","value":3},{"date":"2025-03-18","value":0},{"date":"2025-03-19","value":0},{"date":"2025-03-20","value":4},{"date":"2025-03-21","value":10},{"date":"2025-03-22","value":0},{"date":"2025-03-23","value":0},{"date":"2025-03-24","value":1},{"date":"2025-03-25","value":0},{"date":"2025-03-26","value":0},{"date":"2025-03-27","value":5},{"date":"2025-03-28","value":1},{"date":"2025-03-29","value":0},{"date":"2025-03-30","value":0},{"date":"2025-03-31","value":2},{"date":"2025-04-01","value":0},{"date":"2025-04-02","value":0},{"date":"2025-04-03","value":2},{"date":"2025-04-04","value":11},{"date":"2025-04-05","value":0},{"date":"2025-04-06","value":0},{"date":"2025-04-07","value":1},{"date":"2025-04-08","value":0},{"date":"2025-04-09","value":0},{"date":"2025-04-10","value":5},{"date":"2025-04-11","value":2},{"date":"2025-04-12","value":0},{"date":"2025-04-13","value":0},{"date":"2025-04-14","value":1},{"date":"2025-04-15","value":0},{"date":"2025-04-16","value":0},{"date":"2025-04-17","value":4},{"date":"2025-04-18","value":7},{"date":"2025-04-19","value":0}];
+
+const labels = RAW.map(r => r.date);
+const X      = RAW.map(r => r.value);
+const n      = X.length;
+
+// ─────────────────────────────────────────────
+//  XmR STATISTICS
+// ─────────────────────────────────────────────
+// Moving ranges (null for first point)
+const MR = [null];
+for (let i = 1; i < n; i++) MR.push(Math.abs(X[i] - X[i-1]));
+
+const xBar  = X.reduce((s,v) => s+v, 0) / n;
+const rBar  = MR.slice(1).reduce((s,v) => s+v, 0) / (n-1);
+
+// d₂ = 1.128 for n=2 moving range
+const d2    = 1.128;
+const D4    = 3.268;
+const sigHat = rBar / d2;
+
+// Natural Process Limits
+const UNPL = xBar + 3 * sigHat;          // = xBar + 2.660*rBar
+const LNPL = Math.max(0, xBar - 3 * sigHat);
+const URL  = D4 * rBar;
+
+// Sigma zone lines
+const s1U = xBar + sigHat;
+const s2U = xBar + 2 * sigHat;
+const s1L = Math.max(0, xBar - sigHat);
+const s2L = Math.max(0, xBar - 2 * sigHat);
+
+// ─────────────────────────────────────────────
+//  SIGNAL DETECTION
+// ─────────────────────────────────────────────
+function detect(data, mean, nplHi, nplLo, z1Hi, z2Hi, z1Lo, z2Lo) {
+  const valid = i => data[i] !== null && data[i] !== undefined;
+  const out = { r1:[], r2:[], r3:[], r4:[] };
+
+  for (let i = 0; i < data.length; i++) {
+    if (!valid(i)) continue;
+
+    // Rule 1 — beyond NPL
+    if (data[i] > nplHi || data[i] < nplLo) out.r1.push(i);
+
+    // Rule 2 — 2 of 3 consecutive beyond 2σ (same side)
+    if (i >= 2) {
+      const w = [i-2, i-1, i].filter(valid);
+      if (w.length === 3) {
+        if (w.filter(j => data[j] > z2Hi).length >= 2) out.r2.push(i);
+        else if (w.filter(j => data[j] < z2Lo).length >= 2) out.r2.push(i);
+      }
+    }
+
+    // Rule 3 — 4 of 5 consecutive beyond 1σ (same side)
+    if (i >= 4) {
+      const w = [i-4, i-3, i-2, i-1, i].filter(valid);
+      if (w.length === 5) {
+        if (w.filter(j => data[j] > z1Hi).length >= 4) out.r3.push(i);
+        else if (w.filter(j => data[j] < z1Lo).length >= 4) out.r3.push(i);
+      }
+    }
+
+    // Rule 4 — 8 successive on same side of mean
+    if (i >= 7) {
+      const w = [i-7,i-6,i-5,i-4,i-3,i-2,i-1,i].filter(valid);
+      if (w.length === 8) {
+        if (w.every(j => data[j] > mean)) out.r4.push(i);
+        else if (w.every(j => data[j] < mean)) out.r4.push(i);
+      }
+    }
+  }
+  return out;
+}
+
+const xSig  = detect(X,  xBar, UNPL, LNPL, s1U, s2U, s1L, s2L);
+const mrSig = detect(MR, rBar, URL,  0,    rBar + sigHat, URL, 0, 0);
+
+// Priority colour per index (highest rule wins visually)
+function xColour(i) {
+  if (xSig.r1.includes(i))  return '#f85149';
+  if (xSig.r2.includes(i))  return '#e3b341';
+  if (xSig.r3.includes(i))  return '#db6d28';
+  if (xSig.r4.includes(i))  return '#bc8cff';
+  return '#4493f8';
+}
+function mrColour(i) {
+  if (mrSig.r1.includes(i)) return '#f85149';
+  if (mrSig.r2.includes(i)) return '#e3b341';
+  return '#3fb950';
+}
+const xSignalSet  = new Set([...xSig.r1, ...xSig.r2, ...xSig.r3, ...xSig.r4]);
+const mrSignalSet = new Set(mrSig.r1);
+
+// ─────────────────────────────────────────────
+//  KPI STRIP
+// ─────────────────────────────────────────────
+const totalSigPts = new Set([...xSig.r1,...xSig.r2,...xSig.r3,...xSig.r4,...mrSig.r1]).size;
+const kpis = [
+  { lbl:'Mean (X̄)',        val: xBar.toFixed(2),    hint:'items / day',             cls:'blue'   },
+  { lbl:'Avg Range (R̄)',   val: rBar.toFixed(2),    hint:'d₂ = 1.128',              cls:'green'  },
+  { lbl:'Sigma Estimate',  val: sigHat.toFixed(3),  hint:'σ̂ = R̄ / d₂',             cls:'blue'   },
+  { lbl:'UNPL',            val: UNPL.toFixed(2),    hint:'X̄ + 3σ̂',                  cls:'red'    },
+  { lbl:'LNPL',            val: LNPL.toFixed(2),    hint:'X̄ − 3σ̂ (floored at 0)',  cls:'amber'  },
+  { lbl:'URL (mR)',        val: URL.toFixed(2),     hint:'D₄ × R̄',                  cls:'red'    },
+  { lbl:'Signal Points',   val: totalSigPts,        hint: totalSigPts ? 'Investigate!' : 'All clear', cls: totalSigPts ? 'red' : 'green' },
+];
+document.getElementById('kpiStrip').innerHTML = kpis.map(k => `
+  <div class="kpi">
+    <div class="kpi-lbl">${k.lbl}</div>
+    <div class="kpi-val ${k.cls}">${k.val}</div>
+    <div class="kpi-hint">${k.hint}</div>
+  </div>`).join('');
+
+// ─────────────────────────────────────────────
+//  CHART HELPERS
+// ─────────────────────────────────────────────
+const flatDS = (val, color, lbl, dash=[]) => ({
+  label: lbl,
+  data: Array(n).fill(val),
+  borderColor: color,
+  borderWidth: 1.5,
+  borderDash: dash,
+  pointRadius: 0,
+  fill: false,
+  tension: 0,
+  order: 0,
+});
+
+const baseOpts = yTitle => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: false,
+  interaction: { mode: 'index', intersect: false },
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#161b22',
+      borderColor: '#273044',
+      borderWidth: 1,
+      titleColor: '#e6edf3',
+      bodyColor: '#7d8fa9',
+      padding: 10,
+      callbacks: {
+        title: ctx => ctx[0].label,
+        label: ctx => {
+          const v = ctx.parsed.y;
+          return v === null ? '' : ` ${ctx.dataset.label}: ${typeof v === 'number' ? v.toFixed(2) : v}`;
+        }
+      }
+    }
+  },
+  scales: {
+    x: {
+      grid: { color: '#1c2230' },
+      ticks: {
+        color: '#7d8fa9', maxRotation: 45, font: { size: 9 },
+        callback(v, i) { return i % 7 === 0 ? labels[i] : ''; }
+      }
+    },
+    y: {
+      grid: { color: '#1c2230' },
+      ticks: { color: '#7d8fa9', font: { size: 10 } },
+      title: { display: true, text: yTitle, color: '#7d8fa9', font: { size: 10 } },
+      beginAtZero: true,
+    }
+  }
+});
+
+// ─────────────────────────────────────────────
+//  X CHART
+// ─────────────────────────────────────────────
+new Chart(document.getElementById('xChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      // zone fills
+      {
+        label: 'Zone 2σ–3σ (upper)',
+        data: Array(n).fill(UNPL),
+        borderWidth: 0,
+        fill: { target: { value: s2U }, above: 'rgba(248,81,73,0.07)', below: 'transparent' },
+        pointRadius: 0, tension: 0, order: 1,
+      },
+      {
+        label: 'Zone 1σ–2σ (upper)',
+        data: Array(n).fill(s2U),
+        borderWidth: 0,
+        fill: { target: { value: s1U }, above: 'rgba(227,179,65,0.07)', below: 'transparent' },
+        pointRadius: 0, tension: 0, order: 1,
+      },
+      // reference lines
+      flatDS(UNPL,  '#f85149', 'UNPL', [7,3]),
+      flatDS(s2U,   'rgba(227,179,65,0.6)', '+2σ̂', [4,4]),
+      flatDS(s1U,   'rgba(227,179,65,0.35)', '+1σ̂', [3,5]),
+      flatDS(xBar,  '#bc8cff', 'X̄', []),
+      flatDS(s1L,   'rgba(227,179,65,0.35)', '−1σ̂', [3,5]),
+      flatDS(s2L,   'rgba(227,179,65,0.6)', '−2σ̂', [4,4]),
+      flatDS(LNPL,  '#f85149', 'LNPL', [7,3]),
+      // data
+      {
+        label: 'Daily Deliveries',
+        data: X,
+        borderColor: '#4493f8',
+        borderWidth: 1.5,
+        pointRadius: X.map((_,i) => xSignalSet.has(i) ? 7 : 3),
+        pointHoverRadius: 9,
+        pointBackgroundColor: X.map((_,i) => xColour(i)),
+        pointBorderColor:     X.map((_,i) => xSignalSet.has(i) ? '#fff' : xColour(i)),
+        pointBorderWidth:     X.map((_,i) => xSignalSet.has(i) ? 1.5 : 0),
+        fill: false, tension: 0.12, order: 2,
+      }
+    ]
+  },
+  options: baseOpts('Delivery Count')
+});
+
+document.getElementById('xLeg').innerHTML = `
+  <div class="leg-item"><div class="leg-dot" style="background:#4493f8"></div>Normal</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#f85149"></div>Rule 1 · Beyond NPL</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#e3b341"></div>Rule 2 · 2/3 beyond 2σ̂</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#db6d28"></div>Rule 3 · 4/5 beyond 1σ̂</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#bc8cff"></div>Rule 4 · 8 same side</div>
+  <div class="leg-item"><div class="leg-line" style="background:#bc8cff"></div>Mean X̄</div>
+  <div class="leg-item"><div class="leg-dash" style="border-color:#f85149"></div>±3σ̂ limits</div>
+  <div class="leg-item"><div class="leg-dash" style="border-color:#e3b341;opacity:.7"></div>±2σ̂</div>
+  <div class="leg-item"><div class="leg-dash" style="border-color:#e3b341;opacity:.4"></div>±1σ̂</div>
+`;
+
+// ─────────────────────────────────────────────
+//  mR CHART
+// ─────────────────────────────────────────────
+new Chart(document.getElementById('mrChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      flatDS(URL,  '#f85149', 'URL', [7,3]),
+      flatDS(rBar, '#bc8cff', 'R̄', []),
+      {
+        label: 'Moving Range',
+        data: MR,
+        borderColor: '#3fb950',
+        borderWidth: 1.5,
+        pointRadius: MR.map((_,i) => mrSignalSet.has(i) ? 7 : (MR[i]===null ? 0 : 3)),
+        pointHoverRadius: 9,
+        pointBackgroundColor: MR.map((_,i) => mrColour(i)),
+        pointBorderColor:     MR.map((_,i) => mrSignalSet.has(i) ? '#fff' : mrColour(i)),
+        pointBorderWidth:     MR.map((_,i) => mrSignalSet.has(i) ? 1.5 : 0),
+        spanGaps: false, fill: false, tension: 0.1, order: 2,
+      }
+    ]
+  },
+  options: baseOpts('Moving Range')
+});
+
+document.getElementById('mrLeg').innerHTML = `
+  <div class="leg-item"><div class="leg-dot" style="background:#3fb950"></div>Moving Range</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#f85149"></div>Rule 1 · Beyond URL</div>
+  <div class="leg-item"><div class="leg-line" style="background:#bc8cff"></div>Mean R̄</div>
+  <div class="leg-item"><div class="leg-dash" style="border-color:#f85149"></div>URL (Upper Range Limit)</div>
+`;
+
+// ─────────────────────────────────────────────
+//  SIGNALS PANEL
+// ─────────────────────────────────────────────
+function sigItems(idxArr, dataArr, cls) {
+  if (!idxArr.length) return `<div class="no-sig">No signals detected</div>`;
+  return `<ul class="sig-list">${[...new Set(idxArr)].sort((a,b)=>a-b).map(i => `
+    <li class="sig-item">
+      <span class="sig-date">${labels[i]}</span>
+      <span class="sig-val ${cls}">${typeof dataArr[i] === 'number' ? dataArr[i].toFixed(2) : '—'}</span>
+    </li>`).join('')}</ul>`;
+}
+
+const ruleDefs = [
+  {
+    cls:'r1', num:'1',
+    name:'Single Point Beyond Limits',
+    def:'One value outside UNPL or LNPL (X chart) or above URL (mR chart). Signals a dominant assignable cause.',
+    x: xSig.r1, mr: mrSig.r1
+  },
+  {
+    cls:'r2', num:'2',
+    name:'2 of 3 Successive Beyond 2σ̂',
+    def:'Two of three consecutive points beyond the same 2σ̂ line. Signals a moderate process change.',
+    x: xSig.r2, mr: []
+  },
+  {
+    cls:'r3', num:'3',
+    name:'4 of 5 Successive Beyond 1σ̂',
+    def:'Four of five consecutive points beyond the same 1σ̂ line. Signals a moderate, sustained shift.',
+    x: xSig.r3, mr: []
+  },
+  {
+    cls:'r4', num:'4',
+    name:'8 Successive on Same Side',
+    def:'Eight consecutive points all above or all below the mean. Signals a small, sustained process shift.',
+    x: xSig.r4, mr: []
+  },
+];
+
+document.getElementById('rulesGrid').innerHTML = ruleDefs.map(r => `
+  <div class="rule-card ${r.cls}">
+    <div class="rule-head">
+      <div class="rule-num">${r.num}</div>
+      <div>
+        <div class="rule-name">${r.name}</div>
+        <div class="rule-def">${r.def}</div>
+      </div>
+    </div>
+    <div class="rule-body">
+      <div class="chart-label">X Chart</div>
+      ${sigItems(r.x, X, 'xv')}
+      ${r.mr !== undefined && (r.cls === 'r1') ? `
+        <div class="chart-label" style="margin-top:10px">mR Chart</div>
+        ${sigItems(r.mr, MR, 'mrv')}
+      ` : ''}
+    </div>
+  </div>`).join('');
+</script>
+</body>
+</html>
