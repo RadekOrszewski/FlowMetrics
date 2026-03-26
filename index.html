@@ -7,20 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0f14;
-    --surface: #151820;
-    --border: #232635;
-    --text: #e8eaf0;
-    --muted: #5c6178;
-    --small: #4ade80;
-    --small-dim: rgba(74,222,128,0.12);
-    --medium: #fb923c;
-    --medium-dim: rgba(251,146,60,0.12);
-    --large: #f87171;
-    --large-dim: rgba(248,113,113,0.12);
-    --p50: #a78bfa;
-    --p85: #60a5fa;
-    --p95: #f472b6;
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e2dfd8;
+    --text: #1a1a1a;
+    --muted: #8a8780;
+    --small: #16a34a;
+    --small-dim: rgba(22,163,74,0.1);
+    --medium: #ea6c0a;
+    --medium-dim: rgba(234,108,10,0.1);
+    --large: #dc2626;
+    --large-dim: rgba(220,38,38,0.1);
+    --p50: #7c3aed;
+    --p85: #2563eb;
+    --p95: #db2777;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,15 +30,10 @@
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
-    padding: 40px 32px;
-    background-image:
-      radial-gradient(ellipse at 10% 0%, rgba(167,139,250,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 90% 100%, rgba(248,113,113,0.05) 0%, transparent 50%);
+    padding: 40px 36px;
   }
 
-  header {
-    margin-bottom: 48px;
-  }
+  header { margin-bottom: 36px; }
 
   .eyebrow {
     font-family: 'DM Mono', monospace;
@@ -51,17 +46,14 @@
 
   h1 {
     font-family: 'Syne', sans-serif;
-    font-size: clamp(28px, 4vw, 44px);
+    font-size: clamp(26px, 4vw, 42px);
     font-weight: 800;
     letter-spacing: -0.02em;
     line-height: 1;
     color: var(--text);
   }
 
-  h1 span {
-    color: var(--muted);
-    font-weight: 700;
-  }
+  h1 span { color: var(--muted); font-weight: 700; }
 
   .subtitle {
     font-size: 14px;
@@ -70,48 +62,75 @@
     font-weight: 300;
   }
 
-  /* Legend + Controls */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
   .toolbar {
     display: flex;
     flex-wrap: wrap;
-    gap: 24px;
+    gap: 20px;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 16px;
   }
 
-  .legend {
-    display: flex;
-    gap: 18px;
-    flex-wrap: wrap;
-  }
+  .legend { display: flex; gap: 10px; flex-wrap: wrap; }
 
   .legend-item {
     display: flex;
     align-items: center;
     gap: 7px;
     font-size: 13px;
-    font-weight: 400;
     cursor: pointer;
     user-select: none;
-    padding: 5px 12px;
+    padding: 5px 13px;
     border-radius: 20px;
     border: 1px solid var(--border);
-    transition: all 0.2s;
+    background: var(--surface);
+    transition: all 0.18s;
+    color: var(--text);
   }
   .legend-item:hover { border-color: var(--muted); }
-  .legend-item.inactive { opacity: 0.3; }
+  .legend-item.inactive { opacity: 0.35; }
 
-  .legend-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-  }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
 
   .pct-legend {
     display: flex;
     gap: 18px;
     flex-wrap: wrap;
     margin-left: auto;
+    align-items: center;
   }
 
   .pct-item {
@@ -123,68 +142,16 @@
     color: var(--muted);
   }
 
-  .pct-line {
-    width: 24px;
-    height: 2px;
-    border-radius: 1px;
-  }
-  .p50-line { background: var(--p50); box-shadow: 0 0 6px var(--p50); }
-  .p85-line { background: var(--p85); box-shadow: 0 0 6px var(--p85); }
-  .p95-line {
-    background: transparent;
-    border-top: 2px dashed var(--p95);
-    box-shadow: none;
-  }
+  .pct-line { width: 24px; height: 2px; border-radius: 1px; }
+  .p50-line { background: var(--p50); }
+  .p85-line { background: var(--p85); }
+  .p95-line { background: transparent; border-top: 2px dashed var(--p95); }
 
-  /* Stats row */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 20px;
-    transition: border-color 0.2s;
-  }
-  .stat-card:hover { border-color: var(--muted); }
-
-  .stat-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-
-  .stat-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1;
-  }
-
-  .stat-sub {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-
-  /* Chart container */
   .chart-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 28px 28px 20px;
-    margin-bottom: 24px;
-    position: relative;
-    overflow: hidden;
   }
 
   .chart-title {
@@ -198,115 +165,31 @@
 
   svg text { font-family: 'DM Mono', monospace; }
 
-  /* Table */
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-
-  .table-header {
-    padding: 18px 24px 14px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .table-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-
-  th {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 10px 24px;
-    text-align: left;
-    font-weight: 500;
-    border-bottom: 1px solid var(--border);
-  }
-
-  td {
-    padding: 10px 24px;
-    border-bottom: 1px solid rgba(35,38,53,0.5);
-    font-weight: 300;
-  }
-
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
-
-  .size-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    font-weight: 500;
-    padding: 3px 10px;
-    border-radius: 12px;
-    letter-spacing: 0.05em;
-  }
-
-  .size-S { color: var(--small); background: var(--small-dim); }
-  .size-M { color: var(--medium); background: var(--medium-dim); }
-  .size-L { color: var(--large); background: var(--large-dim); }
-
-  .bar-cell { width: 180px; }
-
-  .bar-bg {
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: visible;
-    position: relative;
-  }
-
-  .bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
-  }
-
-  /* Tooltip */
   .tooltip {
     position: fixed;
-    background: #1e2130;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 14px;
-    font-size: 12px;
     pointer-events: none;
     z-index: 100;
     opacity: 0;
-    transition: opacity 0.15s;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transition: opacity 0.12s;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    min-width: 110px;
   }
   .tooltip.visible { opacity: 1; }
-  .tooltip .tt-date { color: var(--muted); font-size: 11px; margin-bottom: 4px; font-family: 'DM Mono', monospace; }
-  .tooltip .tt-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
-  .tooltip .tt-days { color: var(--muted); font-size: 11px; }
+  .tt-date { color: var(--muted); font-size: 11px; margin-bottom: 2px; font-family: 'DM Mono', monospace; }
+  .tt-size { font-size: 11px; margin-bottom: 3px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+  .tt-val  { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
+  .tt-days { color: var(--muted); font-size: 11px; margin-top: 1px; }
 
   footer {
     text-align: center;
     font-family: 'DM Mono', monospace;
     font-size: 11px;
     color: var(--muted);
-    margin-top: 8px;
+    margin-top: 20px;
     letter-spacing: 0.08em;
   }
 </style>
@@ -319,12 +202,10 @@
   <p class="subtitle">36 completed items · cycle time in days</p>
 </header>
 
-<!-- Stats -->
 <div class="stats-row" id="statsRow"></div>
 
-<!-- Toolbar -->
 <div class="toolbar">
-  <div class="legend" id="legend">
+  <div class="legend">
     <div class="legend-item" data-size="S" onclick="toggleSize('S')">
       <div class="legend-dot" style="background:var(--small)"></div> Small
     </div>
@@ -342,42 +223,17 @@
   </div>
 </div>
 
-<!-- Scatter / Timeline chart -->
 <div class="chart-wrap">
   <div class="chart-title">Lead time by completion date</div>
-  <svg id="timelineChart" width="100%" style="display:block"></svg>
+  <svg id="chart" width="100%" style="display:block"></svg>
 </div>
 
-<!-- Distribution chart -->
-<div class="chart-wrap">
-  <div class="chart-title">Distribution (dot plot)</div>
-  <svg id="distChart" width="100%" style="display:block"></svg>
-</div>
-
-<!-- Table -->
-<div class="table-wrap">
-  <div class="table-header">
-    <div class="table-title">All items</div>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Completion date</th>
-        <th>Size</th>
-        <th>Lead time (days)</th>
-        <th class="bar-cell">Relative</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-</div>
-
-<footer>lead_times_2024_25 · generated visualization</footer>
+<footer>lead_times_2024_25</footer>
 
 <div class="tooltip" id="tooltip">
   <div class="tt-date" id="tt-date"></div>
-  <div class="tt-val" id="tt-val"></div>
+  <div class="tt-size" id="tt-size"></div>
+  <div class="tt-val"  id="tt-val"></div>
   <div class="tt-days">days</div>
 </div>
 
@@ -421,325 +277,169 @@ const RAW = [
   {date:"10 Grudnia 2025",size:"S",days:44},
 ];
 
-// Polish month map to parse dates
 const MONTHS = {
   'Stycznia':0,'Lutego':1,'Marca':2,'Kwietnia':3,'Maja':4,'Czerwca':5,
   'Lipca':6,'Sierpnia':7,'Września':8,'Października':9,'Listopada':10,'Grudnia':11
 };
 
-function parsePolishDate(s) {
-  const parts = s.trim().split(' ');
-  return new Date(parseInt(parts[2]), MONTHS[parts[1]], parseInt(parts[0]));
-}
-
-const data = RAW.map(d => ({...d, dateObj: parsePolishDate(d.date)}))
-  .sort((a,b) => a.dateObj - b.dateObj);
-
-const COLOR = {S:'#4ade80', M:'#fb923c', L:'#f87171'};
-const COLOR_DIM = {S:'rgba(74,222,128,0.15)', M:'rgba(251,146,60,0.15)', L:'rgba(248,113,113,0.15)'};
+const COLOR = {S:'#16a34a', M:'#ea6c0a', L:'#dc2626'};
 const LABEL = {S:'Small', M:'Medium', L:'Large'};
 
+const data = RAW.map(d => ({
+  ...d,
+  dateObj: (() => { const p=d.date.trim().split(' '); return new Date(+p[2], MONTHS[p[1]], +p[0]); })()
+})).sort((a,b)=>a.dateObj-b.dateObj);
+
+window.RAW_DATA = data;
 let active = {S:true, M:true, L:true};
 
 function percentile(arr, p) {
-  const sorted = [...arr].sort((a,b)=>a-b);
-  const idx = (p/100)*(sorted.length-1);
-  const lo = Math.floor(idx), hi = Math.ceil(idx);
-  return sorted[lo] + (idx-lo)*(sorted[hi]-sorted[lo]);
+  const s = [...arr].sort((a,b)=>a-b);
+  const i = (p/100)*(s.length-1);
+  const lo = Math.floor(i), hi = Math.ceil(i);
+  return s[lo] + (i-lo)*(s[hi]-s[lo]);
 }
 
-function allPercentiles() {
-  const vals = data.map(d=>d.days);
-  return {
-    p50: percentile(vals, 50),
-    p85: percentile(vals, 85),
-    p95: percentile(vals, 95)
-  };
+function allP() {
+  const v = data.map(d=>d.days);
+  return { p50:percentile(v,50), p85:percentile(v,85), p95:percentile(v,95) };
 }
 
-function sizePercentiles(size) {
-  const vals = data.filter(d=>d.size===size).map(d=>d.days);
-  return {
-    p50: percentile(vals, 50),
-    p85: percentile(vals, 85),
-    p95: percentile(vals, 95)
-  };
-}
-
-// Render stats
+// Stats
 function renderStats() {
-  const container = document.getElementById('statsRow');
-  const all = allPercentiles();
-  const totalItems = data.length;
+  const {p50,p85,p95} = allP();
   const avg = (data.reduce((s,d)=>s+d.days,0)/data.length).toFixed(0);
-
+  const maxVal = Math.max(...data.map(d=>d.days));
   const cards = [
-    {label:'Total items', value: totalItems, sub: 'across all sizes'},
-    {label:'P50 · Median', value: all.p50.toFixed(0)+'d', sub: 'all items'},
-    {label:'P85', value: all.p85.toFixed(0)+'d', sub: 'all items'},
-    {label:'P95', value: all.p95.toFixed(0)+'d', sub: 'all items'},
-    {label:'Avg lead time', value: avg+'d', sub: 'arithmetic mean'},
-    {label:'Max lead time', value: Math.max(...data.map(d=>d.days))+'d', sub: data.find(d=>d.days===Math.max(...data.map(x=>x.days))).date},
+    {label:'Total items',   value:data.length,          sub:'across all sizes'},
+    {label:'P50 · Median',  value:Math.round(p50)+'d',  sub:'all items'},
+    {label:'P85',           value:Math.round(p85)+'d',  sub:'all items'},
+    {label:'P95',           value:Math.round(p95)+'d',  sub:'all items'},
+    {label:'Avg lead time', value:avg+'d',               sub:'arithmetic mean'},
+    {label:'Max lead time', value:maxVal+'d',            sub:data.find(d=>d.days===maxVal).date},
   ];
-
-  container.innerHTML = cards.map(c => `
+  document.getElementById('statsRow').innerHTML = cards.map(c=>`
     <div class="stat-card">
       <div class="stat-label">${c.label}</div>
       <div class="stat-value">${c.value}</div>
       <div class="stat-sub">${c.sub}</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 // Tooltip
-const tooltip = document.getElementById('tooltip');
-function showTooltip(e, d) {
-  tooltip.classList.add('visible');
+const tip = document.getElementById('tooltip');
+function showTip(e, d) {
+  tip.classList.add('visible');
   document.getElementById('tt-date').textContent = d.date;
-  document.getElementById('tt-val').style.color = COLOR[d.size];
+  document.getElementById('tt-size').textContent = LABEL[d.size];
+  document.getElementById('tt-size').style.color = COLOR[d.size];
   document.getElementById('tt-val').textContent = d.days;
+  document.getElementById('tt-val').style.color = COLOR[d.size];
   moveTip(e);
 }
 function moveTip(e) {
-  tooltip.style.left = (e.clientX + 14) + 'px';
-  tooltip.style.top = (e.clientY - 36) + 'px';
+  tip.style.left = (e.clientX+16)+'px';
+  tip.style.top  = (e.clientY-50)+'px';
 }
-function hideTip() { tooltip.classList.remove('visible'); }
+function hideTip() { tip.classList.remove('visible'); }
 
-// ─── Timeline Chart ────────────────────────────────────────────────────────
-function renderTimeline() {
-  const svgEl = document.getElementById('timelineChart');
-  const W = svgEl.parentElement.offsetWidth - 56;
-  const H = 320;
-  const PAD = {top:20, right:20, bottom:40, left:52};
-  const IW = W - PAD.left - PAD.right;
-  const IH = H - PAD.top - PAD.bottom;
+// Chart
+function renderChart() {
+  const svg  = document.getElementById('chart');
+  const W    = svg.parentElement.offsetWidth - 56;
+  const H    = 420;
+  const PAD  = {top:16, right:72, bottom:44, left:48};
+  const IW   = W - PAD.left - PAD.right;
+  const IH   = H - PAD.top  - PAD.bottom;
 
-  const visData = data.filter(d=>active[d.size]);
-  const allDays = data.map(d=>d.days);
-  const maxDays = Math.max(...allDays);
-  const minDate = data[0].dateObj;
-  const maxDate = data[data.length-1].dateObj;
-  const dateRange = maxDate - minDate;
-  const {p50, p85, p95} = allPercentiles();
+  const maxDays  = Math.max(...data.map(d=>d.days));
+  const minDate  = data[0].dateObj;
+  const maxDate  = data[data.length-1].dateObj;
+  const span     = maxDate - minDate;
 
-  function xScale(d) { return PAD.left + ((d.dateObj - minDate)/dateRange)*IW; }
-  function yScale(v) { return PAD.top + IH - (v/maxDays)*IH; }
-  function xScaleDate(d) { return PAD.left + ((d - minDate)/dateRange)*IW; }
+  const xD = d  => PAD.left + ((d.dateObj - minDate) / span) * IW;
+  const xT = ts => PAD.left + ((ts - minDate) / span) * IW;
+  const yV = v  => PAD.top  + IH - (v / maxDays) * IH;
 
-  // Y gridlines
-  let gridLines = '';
-  const yticks = [0, 100, 200, 300, 400];
-  yticks.forEach(v => {
-    const y = yScale(v);
-    gridLines += `<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}" stroke="#232635" stroke-width="1"/>`;
-    gridLines += `<text x="${PAD.left-8}" y="${y+4}" fill="#5c6178" font-size="10" text-anchor="end">${v}</text>`;
+  // Y grid
+  let grid = '';
+  [0, 50, 100, 150, 200, 250, 300, 350, 400].forEach(v => {
+    if(yV(v) < PAD.top - 2) return;
+    grid += `<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${yV(v)}" y2="${yV(v)}"
+      stroke="#ece9e2" stroke-width="1"/>`;
+    grid += `<text x="${PAD.left-6}" y="${yV(v)+4}" fill="#b0ada6" font-size="10"
+      text-anchor="end">${v}</text>`;
   });
 
-  // X axis ticks (monthly-ish)
-  let xTicks = '';
-  const months = [];
+  // X axis
+  const mL = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let xAxis = `<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${PAD.top+IH}" y2="${PAD.top+IH}"
+    stroke="#d0cdc6" stroke-width="1"/>`;
   let d = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
   while(d <= maxDate) {
-    months.push(new Date(d));
+    const x = xT(d);
+    if(x >= PAD.left-2 && x <= PAD.left+IW+2) {
+      xAxis += `<line x1="${x}" x2="${x}" y1="${PAD.top+IH}" y2="${PAD.top+IH+5}"
+        stroke="#c0bdb6" stroke-width="1"/>`;
+      xAxis += `<text x="${x}" y="${PAD.top+IH+17}" fill="#a09d96" font-size="10"
+        text-anchor="middle">${mL[d.getMonth()]} '${String(d.getFullYear()).slice(2)}</text>`;
+    }
     d = new Date(d.getFullYear(), d.getMonth()+2, 1);
   }
-  const mLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  months.forEach(m => {
-    const x = xScaleDate(m);
-    if(x < PAD.left || x > PAD.left+IW) return;
-    xTicks += `<line x1="${x}" x2="${x}" y1="${PAD.top+IH}" y2="${PAD.top+IH+5}" stroke="#5c6178" stroke-width="1"/>`;
-    xTicks += `<text x="${x}" y="${PAD.top+IH+16}" fill="#5c6178" font-size="10" text-anchor="middle">${mLabels[m.getMonth()]} ${String(m.getFullYear()).slice(2)}</text>`;
-  });
 
   // Percentile lines
-  const pLines = [
-    {val:p50, color:'#a78bfa', dash:'', label:'P50'},
-    {val:p85, color:'#60a5fa', dash:'', label:'P85'},
-    {val:p95, color:'#f472b6', dash:'6,3', label:'P95'},
+  const {p50,p85,p95} = allP();
+  const pDefs = [
+    {val:p50, color:'#7c3aed', dash:'',    label:'P50'},
+    {val:p85, color:'#2563eb', dash:'',    label:'P85'},
+    {val:p95, color:'#db2777', dash:'5,3', label:'P95'},
   ];
-  let percentileLines = '';
-  pLines.forEach(pl => {
-    const y = yScale(pl.val);
-    const dashAttr = pl.dash ? `stroke-dasharray="${pl.dash}"` : '';
-    percentileLines += `
+  let pLines = '';
+  pDefs.forEach(pl => {
+    const y  = yV(pl.val);
+    const da = pl.dash ? `stroke-dasharray="${pl.dash}"` : '';
+    pLines += `
       <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}"
-        stroke="${pl.color}" stroke-width="1.5" ${dashAttr} opacity="0.8"/>
-      <text x="${PAD.left+IW+4}" y="${y+4}" fill="${pl.color}" font-size="10">${pl.label}</text>
-      <text x="${PAD.left+IW+4}" y="${y+15}" fill="${pl.color}" font-size="9" opacity="0.7">${Math.round(pl.val)}d</text>
+        stroke="${pl.color}" stroke-width="1.5" ${da} opacity="0.65"/>
+      <rect x="${PAD.left+IW+4}" y="${y-9}" width="62" height="18" rx="4"
+        fill="${pl.color}" opacity="0.1"/>
+      <text x="${PAD.left+IW+8}" y="${y+4}" fill="${pl.color}" font-size="10.5"
+        font-weight="500">${pl.label} ${Math.round(pl.val)}d</text>
     `;
   });
 
   // Dots
   let dots = '';
-  visData.forEach((d,i) => {
-    const cx = xScale(d);
-    const cy = yScale(d.days);
+  data.forEach(item => {
+    if(!active[item.size]) return;
+    const cx  = xD(item);
+    const cy  = yV(item.days);
+    const idx = data.indexOf(item);
     dots += `
-      <circle cx="${cx}" cy="${cy}" r="6" fill="${COLOR[d.size]}" opacity="0.85"
-        style="cursor:pointer; filter:drop-shadow(0 0 4px ${COLOR[d.size]}80)"
-        data-idx="${data.indexOf(d)}"
-        onmouseenter="showTooltip(event,RAW_DATA[${data.indexOf(d)}])"
+      <circle cx="${cx}" cy="${cy}" r="6.5"
+        fill="${COLOR[item.size]}" opacity="0.80"
+        stroke="white" stroke-width="1.5"
+        style="cursor:pointer;transition:r 0.1s,opacity 0.1s"
+        onmouseenter="this.setAttribute('r','8.5');this.style.opacity='1';showTip(event,RAW_DATA[${idx}])"
         onmousemove="moveTip(event)"
-        onmouseleave="hideTip()"
-      />
-    `;
+        onmouseleave="this.setAttribute('r','6.5');this.style.opacity='0.80';hideTip()"
+      />`;
   });
 
-  svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svgEl.setAttribute('height', H);
-  svgEl.innerHTML = gridLines + xTicks + percentileLines + dots;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('height', H);
+  svg.innerHTML = grid + xAxis + pLines + dots;
 }
-
-// ─── Distribution Dot Plot ─────────────────────────────────────────────────
-function renderDist() {
-  const svgEl = document.getElementById('distChart');
-  const W = svgEl.parentElement.offsetWidth - 56;
-  const H = 240;
-  const PAD = {top:30, right:60, bottom:40, left:52};
-  const IW = W - PAD.left - PAD.right;
-  const IH = H - PAD.top - PAD.bottom;
-
-  const sizes = ['S','M','L'];
-  const numSizes = sizes.length;
-  const rowH = IH / numSizes;
-  const allDays = data.map(d=>d.days);
-  const maxDays = Math.max(...allDays);
-  function xScale(v) { return PAD.left + (v/maxDays)*IW; }
-
-  // Gridlines
-  let grid = '';
-  [0,100,200,300,400].forEach(v => {
-    const x = xScale(v);
-    grid += `<line x1="${x}" x2="${x}" y1="${PAD.top}" y2="${PAD.top+IH}" stroke="#232635" stroke-width="1"/>`;
-    grid += `<text x="${x}" y="${PAD.top+IH+14}" fill="#5c6178" font-size="10" text-anchor="middle">${v}d</text>`;
-  });
-
-  // Per-size rows
-  let content = '';
-  const {p50, p85, p95} = allPercentiles();
-
-  sizes.forEach((s,si) => {
-    const cy = PAD.top + si*rowH + rowH/2;
-    const pts = sizePercentiles(s);
-
-    // Row label
-    const labelColor = COLOR[s];
-    content += `
-      <text x="${PAD.left-10}" y="${cy+5}" fill="${labelColor}" font-size="12"
-        text-anchor="end" font-weight="500">${s}</text>
-    `;
-
-    // IQR band - just draw line from min to max for that size
-    const sizeData = data.filter(d=>d.size===s);
-    const vals = sizeData.map(d=>d.days);
-    const sMin = Math.min(...vals), sMax = Math.max(...vals);
-    if(active[s]) {
-      content += `
-        <line x1="${xScale(sMin)}" x2="${xScale(sMax)}" y1="${cy}" y2="${cy}"
-          stroke="${COLOR_DIM[s]}" stroke-width="12" stroke-linecap="round"/>
-      `;
-    }
-
-    // Dots
-    // Bin by ~10-day buckets to avoid too much overlap
-    const binMap = {};
-    sizeData.forEach(d => {
-      const bin = Math.round(d.days/10)*10;
-      binMap[bin] = (binMap[bin]||[]);
-      binMap[bin].push(d);
-    });
-
-    Object.entries(binMap).forEach(([bin, items]) => {
-      items.forEach((item, ii) => {
-        const cx = xScale(item.days);
-        const jitter = (ii - (items.length-1)/2)*12;
-        if(!active[item.size]) return;
-        content += `
-          <circle cx="${cx}" cy="${cy+jitter}" r="5" fill="${COLOR[item.size]}" opacity="0.85"
-            style="cursor:pointer; filter:drop-shadow(0 0 3px ${COLOR[item.size]}60)"
-            onmouseenter="showTooltip(event,RAW_DATA[${data.indexOf(item)}])"
-            onmousemove="moveTip(event)"
-            onmouseleave="hideTip()"
-          />
-        `;
-      });
-    });
-
-    // Per-size percentile ticks
-    [pts.p50, pts.p85, pts.p95].forEach((pv, pi) => {
-      const colors = ['#a78bfa','#60a5fa','#f472b6'];
-      const labels = ['p50','p85','p95'];
-      const x = xScale(pv);
-      content += `
-        <line x1="${x}" x2="${x}" y1="${cy-18}" y2="${cy+18}"
-          stroke="${colors[pi]}" stroke-width="1.5" opacity="0.6"
-          ${pi===2?'stroke-dasharray="4,2"':''}/>
-      `;
-    });
-  });
-
-  // Overall percentile vertical lines
-  const pLines = [
-    {val:p50, color:'#a78bfa', dash:''},
-    {val:p85, color:'#60a5fa', dash:''},
-    {val:p95, color:'#f472b6', dash:'6,3'},
-  ];
-  let overallP = '';
-  pLines.forEach(pl => {
-    const x = xScale(pl.val);
-    const dash = pl.dash ? `stroke-dasharray="${pl.dash}"` : '';
-    overallP += `
-      <line x1="${x}" x2="${x}" y1="${PAD.top-10}" y2="${PAD.top+IH}"
-        stroke="${pl.color}" stroke-width="1" ${dash} opacity="0.3"/>
-    `;
-  });
-
-  svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svgEl.setAttribute('height', H);
-  svgEl.innerHTML = grid + overallP + content;
-}
-
-// ─── Table ─────────────────────────────────────────────────────────────────
-function renderTable() {
-  const tbody = document.getElementById('tableBody');
-  const maxDays = Math.max(...data.map(d=>d.days));
-  tbody.innerHTML = data.map((d,i) => `
-    <tr>
-      <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:11px">${String(i+1).padStart(2,'0')}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:12px">${d.date}</td>
-      <td><span class="size-badge size-${d.size}">${LABEL[d.size]}</span></td>
-      <td style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:${COLOR[d.size]}">${d.days}</td>
-      <td class="bar-cell">
-        <div class="bar-bg">
-          <div class="bar-fill" style="width:${(d.days/maxDays*100).toFixed(1)}%;background:${COLOR[d.size]}"></div>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// ─── Toggle size visibility ─────────────────────────────────────────────────
-window.RAW_DATA = data;
 
 function toggleSize(s) {
   active[s] = !active[s];
-  const item = document.querySelector(`.legend-item[data-size="${s}"]`);
-  item.classList.toggle('inactive', !active[s]);
-  renderTimeline();
-  renderDist();
+  document.querySelector(`.legend-item[data-size="${s}"]`).classList.toggle('inactive', !active[s]);
+  renderChart();
 }
 
-// ─── Init ───────────────────────────────────────────────────────────────────
-function render() {
-  renderStats();
-  renderTimeline();
-  renderDist();
-  renderTable();
-}
-
-render();
-window.addEventListener('resize', () => { renderTimeline(); renderDist(); });
+renderStats();
+renderChart();
+window.addEventListener('resize', renderChart);
 </script>
 </body>
 </html>
