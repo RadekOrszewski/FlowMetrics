@@ -13,11 +13,8 @@
     --text: #1a1a1a;
     --muted: #8a8780;
     --small: #16a34a;
-    --small-dim: rgba(22,163,74,0.1);
     --medium: #ea6c0a;
-    --medium-dim: rgba(234,108,10,0.1);
     --large: #dc2626;
-    --large-dim: rgba(220,38,38,0.1);
     --p50: #7c3aed;
     --p85: #2563eb;
     --p95: #db2777;
@@ -52,7 +49,6 @@
     line-height: 1;
     color: var(--text);
   }
-
   h1 span { color: var(--muted); font-weight: 700; }
 
   .subtitle {
@@ -62,20 +58,20 @@
     font-weight: 300;
   }
 
+  /* ── Stats ── */
   .stats-row {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
     gap: 10px;
     margin-bottom: 28px;
   }
-
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 14px 18px;
+    transition: border-color 0.15s;
   }
-
   .stat-label {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -84,7 +80,6 @@
     color: var(--muted);
     margin-bottom: 6px;
   }
-
   .stat-value {
     font-family: 'Syne', sans-serif;
     font-size: 26px;
@@ -93,46 +88,71 @@
     line-height: 1;
     color: var(--text);
   }
-
   .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
+  /* ── Toolbar ── */
   .toolbar {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 16px;
     align-items: center;
     margin-bottom: 16px;
   }
 
-  .legend { display: flex; gap: 10px; flex-wrap: wrap; }
+  /* Size filter pills */
+  .size-filters { display: flex; gap: 8px; align-items: center; }
 
-  .legend-item {
+  .filter-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 2px;
+  }
+
+  .size-btn {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 6px;
     font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
     user-select: none;
-    padding: 5px 13px;
+    padding: 5px 14px;
     border-radius: 20px;
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     background: var(--surface);
-    transition: all 0.18s;
     color: var(--text);
+    transition: all 0.18s;
+    font-family: 'DM Sans', sans-serif;
   }
-  .legend-item:hover { border-color: var(--muted); }
-  .legend-item.inactive { opacity: 0.35; }
+  .size-btn:hover { border-color: var(--muted); }
+  .size-btn .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+  /* Active = size is ON; dimmed = off */
+  .size-btn.off { opacity: 0.32; }
 
+  /* When exactly one size is active, highlight it */
+  .size-btn.solo {
+    font-weight: 700;
+    box-shadow: 0 0 0 2px currentColor;
+  }
+
+  /* Divider */
+  .toolbar-sep {
+    width: 1px; height: 24px;
+    background: var(--border);
+  }
+
+  /* Percentile legend */
   .pct-legend {
     display: flex;
     gap: 18px;
     flex-wrap: wrap;
-    margin-left: auto;
     align-items: center;
+    margin-left: auto;
   }
-
   .pct-item {
     display: flex;
     align-items: center;
@@ -141,19 +161,49 @@
     font-size: 12px;
     color: var(--muted);
   }
-
   .pct-line { width: 24px; height: 2px; border-radius: 1px; }
   .p50-line { background: var(--p50); }
   .p85-line { background: var(--p85); }
   .p95-line { background: transparent; border-top: 2px dashed var(--p95); }
 
+  /* Restore banner */
+  .restore-bar {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    background: #fefce8;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #92400e;
+  }
+  .restore-bar.visible { display: flex; }
+  .restore-bar strong { font-weight: 600; }
+  .restore-btn {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 14px;
+    border: 1px solid #fbbf24;
+    background: white;
+    color: #92400e;
+    transition: background 0.15s;
+  }
+  .restore-btn:hover { background: #fef9c3; }
+
+  /* Chart */
   .chart-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 28px 28px 20px;
+    position: relative;
   }
-
   .chart-title {
     font-family: 'DM Mono', monospace;
     font-size: 11px;
@@ -162,9 +212,9 @@
     color: var(--muted);
     margin-bottom: 20px;
   }
-
   svg text { font-family: 'DM Mono', monospace; }
 
+  /* Tooltip */
   .tooltip {
     position: fixed;
     background: var(--surface);
@@ -176,13 +226,14 @@
     opacity: 0;
     transition: opacity 0.12s;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    min-width: 110px;
+    min-width: 120px;
   }
   .tooltip.visible { opacity: 1; }
   .tt-date { color: var(--muted); font-size: 11px; margin-bottom: 2px; font-family: 'DM Mono', monospace; }
-  .tt-size { font-size: 11px; margin-bottom: 3px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+  .tt-size { font-size: 11px; margin-bottom: 3px; font-weight: 500; }
   .tt-val  { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
   .tt-days { color: var(--muted); font-size: 11px; margin-top: 1px; }
+  .tt-hint { color: var(--muted); font-size: 10px; margin-top: 6px; font-family: 'DM Mono', monospace; border-top: 1px solid var(--border); padding-top: 5px; }
 
   footer {
     text-align: center;
@@ -199,28 +250,35 @@
 <header>
   <div class="eyebrow">Delivery Analytics</div>
   <h1>Lead Times <span>2024/25</span></h1>
-  <p class="subtitle">36 completed items · cycle time in days</p>
+  <p class="subtitle" id="subtitle">36 completed items · cycle time in days</p>
 </header>
 
 <div class="stats-row" id="statsRow"></div>
 
 <div class="toolbar">
-  <div class="legend">
-    <div class="legend-item" data-size="S" onclick="toggleSize('S')">
-      <div class="legend-dot" style="background:var(--small)"></div> Small
-    </div>
-    <div class="legend-item" data-size="M" onclick="toggleSize('M')">
-      <div class="legend-dot" style="background:var(--medium)"></div> Medium
-    </div>
-    <div class="legend-item" data-size="L" onclick="toggleSize('L')">
-      <div class="legend-dot" style="background:var(--large)"></div> Large
-    </div>
+  <div class="size-filters">
+    <span class="filter-label">Size</span>
+    <button class="size-btn" id="btn-S" onclick="toggleSize('S')">
+      <span class="dot" style="background:var(--small)"></span> Small
+    </button>
+    <button class="size-btn" id="btn-M" onclick="toggleSize('M')">
+      <span class="dot" style="background:var(--medium)"></span> Medium
+    </button>
+    <button class="size-btn" id="btn-L" onclick="toggleSize('L')">
+      <span class="dot" style="background:var(--large)"></span> Large
+    </button>
   </div>
-  <div class="pct-legend">
-    <div class="pct-item"><div class="pct-line p50-line"></div> P50</div>
-    <div class="pct-item"><div class="pct-line p85-line"></div> P85</div>
-    <div class="pct-item"><div class="pct-line p95-line"></div> P95</div>
+
+  <div class="toolbar-sep"></div>
+
+  <div class="pct-legend" id="pctLegend">
+    <!-- rendered dynamically -->
   </div>
+</div>
+
+<div class="restore-bar" id="restoreBar">
+  <span id="restoreText">— removed items</span>
+  <button class="restore-btn" onclick="restoreAll()">Restore all</button>
 </div>
 
 <div class="chart-wrap">
@@ -235,6 +293,7 @@
   <div class="tt-size" id="tt-size"></div>
   <div class="tt-val"  id="tt-val"></div>
   <div class="tt-days">days</div>
+  <div class="tt-hint" id="tt-hint">click to remove</div>
 </div>
 
 <script>
@@ -281,89 +340,192 @@ const MONTHS = {
   'Stycznia':0,'Lutego':1,'Marca':2,'Kwietnia':3,'Maja':4,'Czerwca':5,
   'Lipca':6,'Sierpnia':7,'Września':8,'Października':9,'Listopada':10,'Grudnia':11
 };
-
 const COLOR = {S:'#16a34a', M:'#ea6c0a', L:'#dc2626'};
 const LABEL = {S:'Small', M:'Medium', L:'Large'};
 
-const data = RAW.map(d => ({
-  ...d,
+// Parse & sort
+const data = RAW.map((d,i) => ({
+  ...d, id: i,
   dateObj: (() => { const p=d.date.trim().split(' '); return new Date(+p[2], MONTHS[p[1]], +p[0]); })()
 })).sort((a,b)=>a.dateObj-b.dateObj);
 
-window.RAW_DATA = data;
-let active = {S:true, M:true, L:true};
+// State
+let active   = {S:true, M:true, L:true}; // which sizes are shown
+let removed  = new Set();                  // set of item ids removed by click
+
+function visibleData() {
+  return data.filter(d => active[d.size] && !removed.has(d.id));
+}
 
 function percentile(arr, p) {
+  if(!arr.length) return 0;
   const s = [...arr].sort((a,b)=>a-b);
   const i = (p/100)*(s.length-1);
   const lo = Math.floor(i), hi = Math.ceil(i);
   return s[lo] + (i-lo)*(s[hi]-s[lo]);
 }
 
-function allP() {
-  const v = data.map(d=>d.days);
-  return { p50:percentile(v,50), p85:percentile(v,85), p95:percentile(v,95) };
-}
+// ─── Active sizes count ──────────────────────────────────────────────────────
+function activeSizes() { return ['S','M','L'].filter(s=>active[s]); }
+function soloSize()    { const a=activeSizes(); return a.length===1 ? a[0] : null; }
 
-// Stats
+// ─── Stats ───────────────────────────────────────────────────────────────────
 function renderStats() {
-  const {p50,p85,p95} = allP();
-  const avg = (data.reduce((s,d)=>s+d.days,0)/data.length).toFixed(0);
-  const maxVal = Math.max(...data.map(d=>d.days));
-  const cards = [
-    {label:'Total items',   value:data.length,          sub:'across all sizes'},
-    {label:'P50 · Median',  value:Math.round(p50)+'d',  sub:'all items'},
-    {label:'P85',           value:Math.round(p85)+'d',  sub:'all items'},
-    {label:'P95',           value:Math.round(p95)+'d',  sub:'all items'},
-    {label:'Avg lead time', value:avg+'d',               sub:'arithmetic mean'},
-    {label:'Max lead time', value:maxVal+'d',            sub:data.find(d=>d.days===maxVal).date},
-  ];
+  const vis  = visibleData();
+  const solo = soloSize();
+
+  let cards;
+  if(solo) {
+    // Single-size mode: show P85 only for that size
+    const vals = vis.map(d=>d.days);
+    const p85  = vals.length ? percentile(vals,85) : 0;
+    const avg  = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(0) : '–';
+    const max  = vals.length ? Math.max(...vals) : 0;
+    cards = [
+      {label:'Items ('+LABEL[solo]+')', value: vis.length, sub:'after removals'},
+      {label:'P85 · '+LABEL[solo],      value: Math.round(p85)+'d', sub:'85th percentile', accent: COLOR[solo]},
+      {label:'Avg lead time',            value: avg+'d', sub:'arithmetic mean'},
+      {label:'Max lead time',            value: max+'d', sub: vis.length ? vis.find(d=>d.days===max)?.date||'' : '–'},
+    ];
+  } else {
+    // All sizes mode: P50, P85, P95
+    const vals = vis.map(d=>d.days);
+    const p50  = vals.length ? percentile(vals,50) : 0;
+    const p85  = vals.length ? percentile(vals,85) : 0;
+    const p95  = vals.length ? percentile(vals,95) : 0;
+    const avg  = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(0) : '–';
+    const max  = vals.length ? Math.max(...vals) : 0;
+    cards = [
+      {label:'Total items',   value: vis.length,          sub:'visible · after removals'},
+      {label:'P50 · Median',  value: Math.round(p50)+'d', sub:'all visible items'},
+      {label:'P85',           value: Math.round(p85)+'d', sub:'all visible items'},
+      {label:'P95',           value: Math.round(p95)+'d', sub:'all visible items'},
+      {label:'Avg lead time', value: avg+'d',              sub:'arithmetic mean'},
+      {label:'Max lead time', value: max+'d',              sub: vis.length ? vis.find(d=>d.days===max)?.date||'' : '–'},
+    ];
+  }
+
   document.getElementById('statsRow').innerHTML = cards.map(c=>`
     <div class="stat-card">
       <div class="stat-label">${c.label}</div>
-      <div class="stat-value">${c.value}</div>
+      <div class="stat-value" style="${c.accent?'color:'+c.accent:''}">${c.value}</div>
       <div class="stat-sub">${c.sub}</div>
     </div>`).join('');
 }
 
-// Tooltip
+// ─── Percentile legend (dynamic) ─────────────────────────────────────────────
+function renderPctLegend() {
+  const solo = soloSize();
+  const el   = document.getElementById('pctLegend');
+  if(solo) {
+    el.innerHTML = `
+      <div class="pct-item">
+        <div class="pct-line" style="background:${COLOR[solo]}"></div>
+        P85 · ${LABEL[solo]}
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <div class="pct-item"><div class="pct-line p50-line"></div> P50</div>
+      <div class="pct-item"><div class="pct-line p85-line"></div> P85</div>
+      <div class="pct-item"><div class="pct-line p95-line"></div> P95</div>`;
+  }
+}
+
+// ─── Size button states ───────────────────────────────────────────────────────
+function refreshButtons() {
+  const solo = soloSize();
+  ['S','M','L'].forEach(s => {
+    const btn = document.getElementById('btn-'+s);
+    btn.classList.toggle('off',  !active[s]);
+    btn.classList.toggle('solo', active[s] && solo === s);
+    if(active[s] && solo === s) {
+      btn.style.color       = COLOR[s];
+      btn.style.borderColor = COLOR[s];
+    } else {
+      btn.style.color       = '';
+      btn.style.borderColor = '';
+    }
+  });
+}
+
+// ─── Restore bar ─────────────────────────────────────────────────────────────
+function refreshRestoreBar() {
+  const bar = document.getElementById('restoreBar');
+  if(removed.size === 0) {
+    bar.classList.remove('visible');
+    return;
+  }
+  bar.classList.add('visible');
+  document.getElementById('restoreText').textContent =
+    `${removed.size} item${removed.size>1?'s':''} removed from chart`;
+}
+
+function restoreAll() {
+  removed.clear();
+  refreshAll();
+}
+
+// ─── Subtitle ─────────────────────────────────────────────────────────────────
+function refreshSubtitle() {
+  const vis  = visibleData();
+  const solo = soloSize();
+  const sizeLabel = solo ? ` · ${LABEL[solo]} only` : '';
+  document.getElementById('subtitle').textContent =
+    `${vis.length} of ${data.length} items visible${sizeLabel} · cycle time in days`;
+}
+
+// ─── Tooltip ─────────────────────────────────────────────────────────────────
 const tip = document.getElementById('tooltip');
+let tipIdx = null;
+
 function showTip(e, d) {
   tip.classList.add('visible');
+  tipIdx = d.id;
   document.getElementById('tt-date').textContent = d.date;
   document.getElementById('tt-size').textContent = LABEL[d.size];
   document.getElementById('tt-size').style.color = COLOR[d.size];
-  document.getElementById('tt-val').textContent = d.days;
-  document.getElementById('tt-val').style.color = COLOR[d.size];
+  document.getElementById('tt-val').textContent  = d.days;
+  document.getElementById('tt-val').style.color  = COLOR[d.size];
   moveTip(e);
 }
 function moveTip(e) {
   tip.style.left = (e.clientX+16)+'px';
-  tip.style.top  = (e.clientY-50)+'px';
+  tip.style.top  = (e.clientY-60)+'px';
 }
-function hideTip() { tip.classList.remove('visible'); }
+function hideTip() {
+  tip.classList.remove('visible');
+  tipIdx = null;
+}
 
-// Chart
+// ─── Remove a dot ─────────────────────────────────────────────────────────────
+function removeDot(id) {
+  hideTip();
+  removed.add(id);
+  refreshAll();
+}
+
+// ─── Chart ───────────────────────────────────────────────────────────────────
 function renderChart() {
   const svg  = document.getElementById('chart');
   const W    = svg.parentElement.offsetWidth - 56;
   const H    = 420;
-  const PAD  = {top:16, right:72, bottom:44, left:48};
+  const PAD  = {top:16, right:80, bottom:44, left:48};
   const IW   = W - PAD.left - PAD.right;
   const IH   = H - PAD.top  - PAD.bottom;
 
-  const maxDays  = Math.max(...data.map(d=>d.days));
+  const allDays  = data.map(d=>d.days);
+  const maxDays  = Math.max(...allDays);
   const minDate  = data[0].dateObj;
   const maxDate  = data[data.length-1].dateObj;
   const span     = maxDate - minDate;
 
   const xD = d  => PAD.left + ((d.dateObj - minDate) / span) * IW;
-  const xT = ts => PAD.left + ((ts - minDate) / span) * IW;
+  const xT = ts => PAD.left + ((ts - minDate)         / span) * IW;
   const yV = v  => PAD.top  + IH - (v / maxDays) * IH;
 
   // Y grid
   let grid = '';
-  [0, 50, 100, 150, 200, 250, 300, 350, 400].forEach(v => {
+  [0,50,100,150,200,250,300,350,400].forEach(v => {
     if(yV(v) < PAD.top - 2) return;
     grid += `<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${yV(v)}" y2="${yV(v)}"
       stroke="#ece9e2" stroke-width="1"/>`;
@@ -387,42 +549,80 @@ function renderChart() {
     d = new Date(d.getFullYear(), d.getMonth()+2, 1);
   }
 
-  // Percentile lines
-  const {p50,p85,p95} = allP();
-  const pDefs = [
-    {val:p50, color:'#7c3aed', dash:'',    label:'P50'},
-    {val:p85, color:'#2563eb', dash:'',    label:'P85'},
-    {val:p95, color:'#db2777', dash:'5,3', label:'P95'},
-  ];
+  // ── Percentile lines ──────────────────────────────────────────────────────
+  const vis  = visibleData();
+  const solo = soloSize();
   let pLines = '';
-  pDefs.forEach(pl => {
-    const y  = yV(pl.val);
-    const da = pl.dash ? `stroke-dasharray="${pl.dash}"` : '';
-    pLines += `
-      <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}"
-        stroke="${pl.color}" stroke-width="1.5" ${da} opacity="0.65"/>
-      <rect x="${PAD.left+IW+4}" y="${y-9}" width="62" height="18" rx="4"
-        fill="${pl.color}" opacity="0.1"/>
-      <text x="${PAD.left+IW+8}" y="${y+4}" fill="${pl.color}" font-size="10.5"
-        font-weight="500">${pl.label} ${Math.round(pl.val)}d</text>
-    `;
-  });
 
-  // Dots
+  if(solo) {
+    // Only P85 for the solo size
+    const vals = vis.map(d=>d.days);
+    if(vals.length) {
+      const p85  = percentile(vals, 85);
+      const y    = yV(p85);
+      const col  = COLOR[solo];
+      pLines += `
+        <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}"
+          stroke="${col}" stroke-width="2" opacity="0.7"/>
+        <rect x="${PAD.left+IW+4}" y="${y-9}" width="70" height="18" rx="4"
+          fill="${col}" opacity="0.1"/>
+        <text x="${PAD.left+IW+8}" y="${y+4}" fill="${col}" font-size="10.5"
+          font-weight="600">P85 ${Math.round(p85)}d</text>`;
+    }
+  } else {
+    // All three percentiles
+    const vals  = vis.map(d=>d.days);
+    if(vals.length) {
+      const pDefs = [
+        {val:percentile(vals,50), color:'#7c3aed', dash:'',    label:'P50'},
+        {val:percentile(vals,85), color:'#2563eb', dash:'',    label:'P85'},
+        {val:percentile(vals,95), color:'#db2777', dash:'5,3', label:'P95'},
+      ];
+      pDefs.forEach(pl => {
+        const y  = yV(pl.val);
+        const da = pl.dash ? `stroke-dasharray="${pl.dash}"` : '';
+        pLines += `
+          <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}"
+            stroke="${pl.color}" stroke-width="1.5" ${da} opacity="0.65"/>
+          <rect x="${PAD.left+IW+4}" y="${y-9}" width="68" height="18" rx="4"
+            fill="${pl.color}" opacity="0.1"/>
+          <text x="${PAD.left+IW+8}" y="${y+4}" fill="${pl.color}" font-size="10.5"
+            font-weight="500">${pl.label} ${Math.round(pl.val)}d</text>`;
+      });
+    }
+  }
+
+  // ── Dots ─────────────────────────────────────────────────────────────────
   let dots = '';
+
+  // Greyed-out removed dots (shown faintly as context)
   data.forEach(item => {
     if(!active[item.size]) return;
+    if(!removed.has(item.id)) return;
+    const cx = xD(item);
+    const cy = yV(item.days);
+    dots += `
+      <circle cx="${cx}" cy="${cy}" r="5"
+        fill="#c8c5be" opacity="0.35"
+        stroke="white" stroke-width="1"
+        style="cursor:default"
+      />`;
+  });
+
+  // Active dots
+  data.forEach(item => {
+    if(!active[item.size] || removed.has(item.id)) return;
     const cx  = xD(item);
     const cy  = yV(item.days);
-    const idx = data.indexOf(item);
     dots += `
       <circle cx="${cx}" cy="${cy}" r="6.5"
-        fill="${COLOR[item.size]}" opacity="0.80"
+        fill="${COLOR[item.size]}" opacity="0.82"
         stroke="white" stroke-width="1.5"
         style="cursor:pointer;transition:r 0.1s,opacity 0.1s"
-        onmouseenter="this.setAttribute('r','8.5');this.style.opacity='1';showTip(event,RAW_DATA[${idx}])"
+        onmouseenter="this.setAttribute('r','8.5');this.style.opacity='1';showTip(event,data[${data.indexOf(item)}])"
         onmousemove="moveTip(event)"
-        onmouseleave="this.setAttribute('r','6.5');this.style.opacity='0.80';hideTip()"
+        onmouseleave="this.setAttribute('r','6.5');this.style.opacity='0.82';hideTip()"
+        onclick="removeDot(${item.id})"
       />`;
   });
 
@@ -431,14 +631,34 @@ function renderChart() {
   svg.innerHTML = grid + xAxis + pLines + dots;
 }
 
+// ─── Toggle size ──────────────────────────────────────────────────────────────
 function toggleSize(s) {
-  active[s] = !active[s];
-  document.querySelector(`.legend-item[data-size="${s}"]`).classList.toggle('inactive', !active[s]);
-  renderChart();
+  // If clicking the only active size, re-enable all
+  const currently = activeSizes();
+  if(currently.length === 1 && currently[0] === s) {
+    active = {S:true, M:true, L:true};
+  } else {
+    active[s] = !active[s];
+    // Prevent all-off
+    if(activeSizes().length === 0) active = {S:true, M:true, L:true};
+  }
+  refreshAll();
 }
 
-renderStats();
-renderChart();
+// ─── Refresh all ─────────────────────────────────────────────────────────────
+function refreshAll() {
+  refreshButtons();
+  refreshPctLegend ? refreshPctLegend() : renderPctLegend();
+  renderStats();
+  renderChart();
+  refreshRestoreBar();
+  refreshSubtitle();
+}
+
+// alias
+const refreshPctLegend = renderPctLegend;
+
+refreshAll();
 window.addEventListener('resize', renderChart);
 </script>
 </body>
