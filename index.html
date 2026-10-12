@@ -162,6 +162,17 @@
     transition: opacity 0.15s; white-space: nowrap;
   }
   .banner-btn:hover { opacity: 0.9; }
+  .restore-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #1c2027; border: 1px solid var(--border);
+    color: var(--text); font-size: 11px; padding: 2px 8px;
+    border-radius: 6px; cursor: pointer; transition: all 0.15s;
+    user-select: none;
+  }
+  .restore-chip:hover {
+    border-color: var(--primary); color: var(--primary);
+    background: #252a34;
+  }
 
   /* ── Chart panels ── */
   .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 24px 18px; position: relative; margin-bottom: 16px; }
@@ -291,7 +302,9 @@
   </div>
 
   <div class="banner banner-restore" id="restoreBar">
-    <span id="restoreText">— items removed</span>
+    <div id="restoreContent" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span id="restoreText">— items removed</span>
+    </div>
     <button class="banner-btn" onclick="restoreAll()">Restore all</button>
   </div>
 
@@ -388,6 +401,15 @@
       <span class="filter-label">Last</span>
       <div class="month-pills" id="histMonthPills"></div>
     </div>
+    <div class="toolbar-sep"></div>
+    <div class="pct-legend" id="histPctLegend"></div>
+  </div>
+
+  <div class="banner banner-restore" id="histRestoreBar">
+    <div id="histRestoreContent" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span id="histRestoreText">— items removed</span>
+    </div>
+    <button class="banner-btn" onclick="restoreAll()">Restore all</button>
   </div>
 
   <div class="chart-wrap">
@@ -432,8 +454,8 @@ function switchTab(id) {
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id==='tab-'+id));
   if(id==='xmr') { renderXMR(); }
-  if(id==='lead') { renderChart(); }
-  if(id==='histogram') { renderHistogram(); }
+  if(id==='lead') { renderChart(); refreshRestoreBar(); }
+  if(id==='histogram') { renderHistogram(); refreshRestoreBar(); renderPctLegend(); }
   document.getElementById('subtitle').textContent = id==='xmr'
     ? `${XMR_DATA.length} items · process behaviour chart`
     : buildSubtitle();
@@ -526,12 +548,14 @@ function renderStats(){
 
 /* ── Pct legend ── */
 function renderPctLegend(){
-  const solo=soloSize(), el=document.getElementById('pctLegend');
-  if(solo){
-    el.innerHTML=`<div class="pct-item"><div class="pct-line" style="background:${COLOR[solo]}"></div>P85 · ${LABEL[solo]}</div>`;
-  } else {
-    el.innerHTML=`<div class="pct-item"><div class="pct-line p50-line"></div>P50</div><div class="pct-item"><div class="pct-line p85-line"></div>P85</div><div class="pct-item"><div class="pct-line p95-line"></div>P95</div>`;
-  }
+  const solo=soloSize();
+  const html = solo
+    ? `<div class="pct-item"><div class="pct-line" style="background:${COLOR[solo]}"></div>P85 · ${LABEL[solo]}</div>`
+    : `<div class="pct-item"><div class="pct-line p50-line"></div>P50</div><div class="pct-item"><div class="pct-line p85-line"></div>P85</div><div class="pct-item"><div class="pct-line p95-line"></div>P95</div>`;
+  ['pctLegend', 'histPctLegend'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=html;
+  });
 }
 
 /* ── Size buttons ── */
@@ -551,12 +575,38 @@ function refreshButtons(){
 
 /* ── Restore bar ── */
 function refreshRestoreBar(){
-  const bar=document.getElementById('restoreBar');
-  if(!removed.size){bar.classList.remove('visible');return;}
-  bar.classList.add('visible');
-  document.getElementById('restoreText').textContent=`${removed.size} item${removed.size>1?'s':''} removed from chart`;
+  const bars = [
+    { bar: document.getElementById('restoreBar'), text: document.getElementById('restoreText'), content: document.getElementById('restoreContent') },
+    { bar: document.getElementById('histRestoreBar'), text: document.getElementById('histRestoreText'), content: document.getElementById('histRestoreContent') }
+  ];
+
+  if(!removed.size){
+    bars.forEach(b => { if(b.bar) b.bar.classList.remove('visible'); });
+    return;
+  }
+
+  const removedItems = ltData.filter(d => removed.has(d.id));
+  const countText = `${removed.size} item${removed.size>1?'s':''} removed`;
+
+  bars.forEach(b => {
+    if(!b.bar) return;
+    b.bar.classList.add('visible');
+    if(b.content){
+      b.content.innerHTML = `<span style="font-weight:600;color:var(--text)">${countText}:</span>` +
+        removedItems.map(item => `
+          <button class="restore-chip" onclick="restoreDot(${item.id})" title="Restore #${item.id} (${item.days}d · ${fmtDate(item.dateObj)})">
+            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${COLOR[item.size]}"></span>
+            #${item.id} · ${item.days}d ↩
+          </button>
+        `).join('');
+    } else if(b.text){
+      b.text.textContent = countText;
+    }
+  });
 }
 function restoreAll(){ removed.clear(); refreshAll(); }
+function restoreDot(id){ hideTip(); removed.delete(id); refreshAll(); }
+function removeDot(id){ hideTip(); removed.add(id); refreshAll(); }
 
 /* ── Subtitle ── */
 function buildSubtitle(){
@@ -574,9 +624,9 @@ function refreshChartTitle(){
 
 /* ── Tooltip (shared) ── */
 const tip=document.getElementById('tooltip');
-function showTip(e,d,xmrMeta){
+function showTip(e,d,xmrMeta,extra){
   tip.classList.add('visible');
-  document.getElementById('tt-date').textContent=fmtDate(d.dateObj);
+  document.getElementById('tt-date').textContent=extra ? `${fmtDate(d.dateObj)} · ${extra}` : fmtDate(d.dateObj);
   if(xmrMeta){
     document.getElementById('tt-size').textContent=`#${d.id}`;
     document.getElementById('tt-size').style.color=xmrMeta.signal?'var(--xmr-unpl)':'var(--muted)';
@@ -590,6 +640,7 @@ function showTip(e,d,xmrMeta){
     document.getElementById('tt-size').textContent=LABEL[d.size];
     document.getElementById('tt-size').style.color=COLOR[d.size];
     document.getElementById('tt-days').textContent='days';
+    document.getElementById('tt-hint').textContent='click to remove';
     document.getElementById('tt-hint').style.display='block';
     document.getElementById('tt-signal').style.display='none';
     const ce=document.getElementById('tt-comment');
@@ -597,6 +648,21 @@ function showTip(e,d,xmrMeta){
   }
   document.getElementById('tt-val').textContent=d.days;
   document.getElementById('tt-val').style.color=xmrMeta?(xmrMeta.signal?'var(--xmr-unpl)':'var(--xmr-line)'):(COLOR[d.size]);
+  moveTip(e);
+}
+function showRemovedTip(e,d,extra){
+  tip.classList.add('visible');
+  document.getElementById('tt-date').textContent=extra ? `${fmtDate(d.dateObj)} · ${extra}` : fmtDate(d.dateObj);
+  document.getElementById('tt-size').textContent=`${LABEL[d.size]} · Removed`;
+  document.getElementById('tt-size').style.color='#9ca3af';
+  document.getElementById('tt-val').textContent=d.days;
+  document.getElementById('tt-val').style.color='var(--primary)';
+  document.getElementById('tt-days').textContent='days';
+  document.getElementById('tt-hint').textContent='↩ click to restore';
+  document.getElementById('tt-hint').style.display='block';
+  document.getElementById('tt-signal').style.display='none';
+  const ce=document.getElementById('tt-comment');
+  if(d.comment){ce.textContent=d.comment;ce.style.display='block';}else{ce.style.display='none';}
   moveTip(e);
 }
 function showHistTip(e, sizeName, sizeKey, start, end, count){
@@ -613,9 +679,6 @@ function showHistTip(e, sizeName, sizeKey, start, end, count){
 }
 function moveTip(e){ tip.style.left=(e.clientX+16)+'px'; tip.style.top=(e.clientY-60)+'px'; }
 function hideTip(){ tip.classList.remove('visible'); }
-
-/* ── Remove dot ── */
-function removeDot(id){ hideTip(); removed.add(id); refreshAll(); }
 
 /* ── Lead time chart ── */
 function renderChart(){
@@ -677,8 +740,11 @@ function renderChart(){
   let dots='';
   plotData.forEach(item=>{
     if(!active[item.size]||!removed.has(item.id))return;
-    const cx=xD(item),cy=yV(item.days);
-    dots+=`<circle cx="${cx}" cy="${cy}" r="5" fill="#333842" opacity="0.35" stroke="#121418" stroke-width="1" style="cursor:default"/>`;
+    const cx=xD(item),cy=yV(item.days), idx=ltData.indexOf(item);
+    dots+=`<circle cx="${cx}" cy="${cy}" r="5.5" fill="rgba(255,255,255,0.06)" stroke="#6b7280" stroke-dasharray="2,2" stroke-width="1.2" style="cursor:pointer;transition:all 0.1s"
+      onmouseenter="this.setAttribute('r','7.5');this.style.stroke='var(--primary)';this.style.fill='rgba(250,221,16,0.2)';showRemovedTip(event,ltData[${idx}])"
+      onmousemove="moveTip(event)" onmouseleave="this.setAttribute('r','5.5');this.style.stroke='#6b7280';this.style.fill='rgba(255,255,255,0.06)';hideTip()"
+      onclick="restoreDot(${item.id})"/>`;
   });
   plotData.forEach(item=>{
     if(!active[item.size]||removed.has(item.id))return;
@@ -698,17 +764,32 @@ function renderChart(){
 /* ── Lead time histogram ── */
 function renderHistogram(){
   const svg=document.getElementById('histogram');
-  const W=Math.max(300, (svg.parentElement.offsetWidth || 800) - 48), H=420, PAD={top:18,right:20,bottom:54,left:48};
+  const W=Math.max(300, (svg.parentElement.offsetWidth || 800) - 48), H=430, PAD={top:38,right:24,bottom:54,left:48};
   const IW=W-PAD.left-PAD.right, IH=H-PAD.top-PAD.bottom;
-  const vis=visibleData();
+  const thresh=rangeThreshold();
+  const rangeData=thresh?ltData.filter(d=>d.dateObj>=thresh):ltData;
+  const activeVis=rangeData.filter(d=>active[d.size]&&!removed.has(d.id));
+  const removedVis=rangeData.filter(d=>active[d.size]&&removed.has(d.id));
+  const allFiltered=[...activeVis, ...removedVis];
   const legend=document.getElementById('histogramLegend');
   const meta=document.getElementById('histogramMeta');
   const sizes=activeSizes();
+  const solo=soloSize();
+
+  const values=activeVis.map(d=>d.days);
+  const pctItems = solo
+    ? `<div class="histogram-legend-item"><span class="histogram-swatch" style="background:${COLOR[solo]}"></span>P85 (${values.length?Math.round(percentile(values,85))+'d':'–'})</div>`
+    : [
+        { label: 'P50', val: percentile(values, 50), col: '#a855f7' },
+        { label: 'P85', val: percentile(values, 85), col: '#fadd10' },
+        { label: 'P95', val: percentile(values, 95), col: '#ec4899' }
+      ].map(p => `<div class="histogram-legend-item"><span class="histogram-swatch" style="background:${p.col}"></span>${p.label} (${values.length?Math.round(p.val)+'d':'–'})</div>`).join('');
 
   legend.innerHTML=sizes.map(s=>`
-    <div class="histogram-legend-item"><span class="histogram-swatch" style="background:${COLOR[s]}"></span>${LABEL[s]}</div>`).join('');
+    <div class="histogram-legend-item"><span class="histogram-swatch" style="background:${COLOR[s]}"></span>${LABEL[s]}</div>
+  `).join('') + (values.length ? `<div style="display:inline-flex;align-items:center;gap:12px;margin-left:8px;padding-left:12px;border-left:1px solid var(--border)">${pctItems}</div>` : '');
 
-  if(!vis.length){
+  if(!allFiltered.length){
     meta.textContent='No items match the current filters.';
     svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
     svg.setAttribute('height',H);
@@ -717,28 +798,39 @@ function renderHistogram(){
     return;
   }
 
-  const values=vis.map(d=>d.days);
   const binWidth=10;
-  const maxDay=Math.max(...values);
+  const maxDay=Math.max(...allFiltered.map(d=>d.days), 10);
   const binCount=Math.max(1,Math.ceil(maxDay/binWidth));
+  const maxPlotDay=binCount*binWidth;
+  const xBin=i=>PAD.left+(i/binCount)*IW;
+  const xDay=day=>PAD.left+Math.min(IW,Math.max(0,(day/maxPlotDay)*IW));
+
   const bins=Array.from({length:binCount},(_,i)=>({
     start:i*binWidth,
-    counts:{S:0,M:0,L:0}
+    end:(i+1)*binWidth,
+    active:{S:[],M:[],L:[]},
+    removed:{S:[],M:[],L:[]}
   }));
-  vis.forEach(item=>{
-    const index=Math.min(binCount-1,Math.floor(item.days/binWidth));
-    bins[index].counts[item.size]++;
+
+  activeVis.forEach(item=>{
+    const idx=Math.min(binCount-1,Math.floor(item.days/binWidth));
+    bins[idx].active[item.size].push(item);
+  });
+  removedVis.forEach(item=>{
+    const idx=Math.min(binCount-1,Math.floor(item.days/binWidth));
+    bins[idx].removed[item.size].push(item);
   });
 
-  const maxCount=Math.max(...bins.map(bin=>sizes.reduce((sum,s)=>sum+bin.counts[s],0)));
+  const maxCount=Math.max(1,...bins.map(bin=>sizes.reduce((sum,s)=>sum+bin.active[s].length+bin.removed[s].length,0)));
   const yStep=Math.max(1,Math.ceil(maxCount/5));
   const yMax=Math.ceil(maxCount/yStep)*yStep;
-  const xPos=i=>PAD.left+(i/binCount)*IW;
   const yPos=count=>PAD.top+IH-(count/yMax)*IH;
+  const unitHeight=IH/yMax;
   const binPixelWidth=IW/binCount;
-  const barWidth=Math.max(1,binPixelWidth*0.75);
+  const barWidth=Math.max(2,binPixelWidth*0.78);
   const barInset=(binPixelWidth-barWidth)/2;
   const barRx=Math.min(2, Math.max(0, barWidth/3));
+
   let grid='';
   for(let count=0;count<=yMax;count+=yStep){
     const y=yPos(count);
@@ -748,35 +840,111 @@ function renderHistogram(){
 
   let bars='';
   bins.forEach((bin,i)=>{
-    let total=0;
+    const x0=xBin(i)+barInset;
+    let runningCount=0;
+
+    // Active items: discrete clickable unit blocks
     sizes.forEach(size=>{
-      const count=bin.counts[size];
-      if(!count)return;
-      const height=(count/yMax)*IH;
-      const y=yPos(total+count);
-      bars+=`<rect x="${xPos(i)+barInset}" y="${y}" width="${barWidth}" height="${height}" fill="${COLOR[size]}" opacity="0.9" rx="${barRx}" stroke="#121418" stroke-width="${binPixelWidth > 6 ? 0.5 : 0}" style="cursor:pointer;transition:opacity 0.1s"
-        onmouseenter="this.style.opacity='1';showHistTip(event, '${LABEL[size]}', '${size}', ${bin.start}, ${bin.start+binWidth}, ${count})"
-        onmousemove="moveTip(event)"
-        onmouseleave="this.style.opacity='0.9';hideTip()"><title>${bin.start}–${bin.start+binWidth} days: ${LABEL[size]} ${count}</title></rect>`;
-      total+=count;
+      bin.active[size].forEach(item=>{
+        const yTop=yPos(runningCount+1);
+        const yBottom=yPos(runningCount);
+        const h=Math.max(1.5, (yBottom-yTop) - (unitHeight > 3 ? 1 : 0));
+        const y=yBottom-h;
+        const idx=ltData.indexOf(item);
+        const isNew=item.isNew;
+        bars+=`<rect x="${x0}" y="${y}" width="${barWidth}" height="${h}" fill="${COLOR[size]}" opacity="${isNew?'1':'0.9'}" rx="${barRx}" stroke="#121418" stroke-width="${isNew?'1.5':'0.5'}" style="cursor:pointer;transition:all 0.1s"
+          onmouseenter="this.style.opacity='1';this.setAttribute('stroke','#ffffff');showTip(event,ltData[${idx}],null,'${bin.start}–${bin.end}d bin')"
+          onmousemove="moveTip(event)"
+          onmouseleave="this.style.opacity='${isNew?'1':'0.9'}';this.setAttribute('stroke','#121418');hideTip()"
+          onclick="removeDot(${item.id})"><title>${item.date}: ${item.days} days (${LABEL[size]}) · click to remove</title></rect>`;
+        runningCount++;
+      });
+    });
+
+    // Removed items: discrete ghost dashed blocks
+    sizes.forEach(size=>{
+      bin.removed[size].forEach(item=>{
+        const yTop=yPos(runningCount+1);
+        const yBottom=yPos(runningCount);
+        const h=Math.max(1.5, (yBottom-yTop) - (unitHeight > 3 ? 1 : 0));
+        const y=yBottom-h;
+        const idx=ltData.indexOf(item);
+        bars+=`<rect x="${x0}" y="${y}" width="${barWidth}" height="${h}" fill="rgba(255,255,255,0.05)" stroke="${COLOR[size]}" stroke-dasharray="2,2" stroke-width="1.2" rx="${barRx}" style="cursor:pointer;transition:all 0.1s"
+          onmouseenter="this.style.fill='rgba(250,221,16,0.2)';this.style.stroke='var(--primary)';showRemovedTip(event,ltData[${idx}],'${bin.start}–${bin.end}d bin')"
+          onmousemove="moveTip(event)"
+          onmouseleave="this.style.fill='rgba(255,255,255,0.05)';this.style.stroke='${COLOR[size]}';hideTip()"
+          onclick="restoreDot(${item.id})"><title>#${item.id} (${item.days}d) · Removed · click to restore</title></rect>`;
+        runningCount++;
+      });
     });
   });
 
+  // X axis
   let xAxis=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${PAD.top+IH}" y2="${PAD.top+IH}" stroke="#2b303b" stroke-width="1"/>`;
   const labelStep = binCount <= 10 ? 1 : binCount <= 20 ? 2 : binCount <= 50 ? 5 : 10;
   for(let i=0; i<=binCount; i+=labelStep){
-    const x=xPos(i);
+    const x=xBin(i);
     const dayVal=i*binWidth;
     xAxis+=`<line x1="${x}" x2="${x}" y1="${PAD.top+IH}" y2="${PAD.top+IH+4}" stroke="#2b303b" stroke-width="1"/>`;
     xAxis+=`<text x="${x}" y="${PAD.top+IH+16}" fill="#8a93a0" font-size="9.5" text-anchor="middle">${dayVal}</text>`;
   }
   xAxis+=`<text x="${PAD.left+IW/2}" y="${H-8}" fill="#9da5b4" font-size="10" text-anchor="middle">Lead time (days)</text>`;
 
-  meta.textContent=`${vis.length} visible item${vis.length===1?'':'s'} · ${binWidth} days per bin`;
+  // Percentile vertical lines and badges
+  let pLines='';
+  if(values.length){
+    const pDefs = solo
+      ? [{ val: percentile(values, 85), color: COLOR[solo], dash: '', label: `P85 ${LABEL[solo]}`, short: 'P85' }]
+      : [
+          { val: percentile(values, 50), color: '#a855f7', dash: '', label: 'P50', short: 'P50' },
+          { val: percentile(values, 85), color: '#fadd10', dash: '', label: 'P85', short: 'P85' },
+          { val: percentile(values, 95), color: '#ec4899', dash: '5,3', label: 'P95', short: 'P95' }
+        ];
+
+    const positioned = pDefs.map(p=>({
+      ...p,
+      x: xDay(p.val),
+      valRound: Math.round(p.val)
+    })).sort((a,b)=>a.x-b.x);
+
+    let lastX = -999;
+    let staggerLevel = 0;
+    positioned.forEach(p=>{
+      if(p.x - lastX < 64){
+        staggerLevel = (staggerLevel + 1) % 2;
+      } else {
+        staggerLevel = 0;
+      }
+      p.stagger = staggerLevel;
+      lastX = p.x;
+    });
+
+    positioned.forEach(pl=>{
+      const x=pl.x;
+      const da=pl.dash?`stroke-dasharray="${pl.dash}"`:'';
+      const badgeY = pl.stagger ? (PAD.top - 34) : (PAD.top - 18);
+      const textVal = `${pl.short} ${pl.valRound}d`;
+      const badgeWidth = Math.max(56, textVal.length * 7 + 12);
+      const badgeX = Math.max(PAD.left, Math.min(PAD.left + IW - badgeWidth, x - badgeWidth/2));
+
+      pLines += `
+        <line x1="${x}" x2="${x}" y1="${PAD.top}" y2="${PAD.top+IH}" stroke="${pl.color}" stroke-width="${pl.short==='P85'?2:1.5}" ${da} opacity="0.85"/>
+        <line x1="${x}" x2="${x}" y1="${badgeY+18}" y2="${PAD.top}" stroke="${pl.color}" stroke-width="1" opacity="0.6"/>
+        <g style="cursor:default">
+          <rect x="${badgeX}" y="${badgeY}" width="${badgeWidth}" height="18" rx="4" fill="#181a20" stroke="${pl.color}" stroke-width="1"/>
+          <text x="${badgeX+badgeWidth/2}" y="${badgeY+12.5}" fill="${pl.color}" font-size="10.5" font-weight="600" text-anchor="middle">${textVal}</text>
+        </g>
+      `;
+    });
+  }
+
+  const removedCount=removedVis.length;
+  const removedNote=removedCount?` · ${removedCount} removed (click ghost block or chip to restore)`:' · click any item to remove';
+  meta.textContent=`${activeVis.length} visible item${activeVis.length===1?'':'s'} · ${binWidth} days per bin${removedNote}`;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   svg.setAttribute('height',H);
-  svg.setAttribute('aria-label',`Lead time histogram showing ${vis.length} items in ${binCount} bins`);
-  svg.innerHTML=grid+xAxis+bars;
+  svg.setAttribute('aria-label',`Lead time histogram showing ${activeVis.length} items in ${binCount} bins`);
+  svg.innerHTML=grid+xAxis+bars+pLines;
 }
 
 /* ── Size toggle ── */
