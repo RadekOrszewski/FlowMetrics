@@ -3,47 +3,84 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Delivery Analytics</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Delivery Analytics — LeanAgile.ninja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --border: #e2dfd8;
-    --text: #1a1a1a;
-    --muted: #8a8780;
-    --small: #16a34a;
-    --medium: #ea6c0a;
-    --large: #dc2626;
-    --p50: #7c3aed;
-    --p85: #2563eb;
-    --p95: #db2777;
-    --xmr-line: #1a1a1a;
-    --xmr-avg: #2563eb;
-    --xmr-unpl: #dc2626;
+    --bg: #090a0c;
+    --surface: #121418;
+    --surface-hover: #181b20;
+    --border: #232730;
+    --border-hover: #373d4a;
+    --text: #ffffff;
+    --muted: #9aa1ad;
+    --primary: #fadd10;
+    --primary-text: #000000;
+    --small: #22c55e;
+    --medium: #f97316;
+    --large: #ef4444;
+    --p50: #a78bfa;
+    --p85: #fadd10;
+    --p95: #f472b6;
+    --xmr-line: #ffffff;
+    --xmr-avg: #60a5fa;
+    --xmr-unpl: #ef4444;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
 
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Poppins', sans-serif;
     min-height: 100vh;
-    padding: 40px 36px;
+    padding: 36px 36px 48px;
   }
 
   header { margin-bottom: 28px; }
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .header-branding {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+  .brand-logo {
+    height: 52px;
+    width: auto;
+    max-width: 140px;
+    object-fit: contain;
+    display: block;
+  }
+  .header-titles {
+    display: flex;
+    flex-direction: column;
+  }
   .eyebrow {
-    font-family: 'DM Mono', monospace; font-size: 11px;
-    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 4px;
   }
   h1 {
-    font-family: 'Syne', sans-serif; font-size: clamp(24px,4vw,40px);
-    font-weight: 800; letter-spacing: -0.02em; line-height: 1; color: var(--text);
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--text);
   }
-  h1 span { color: var(--muted); font-weight: 700; }
-  .subtitle { font-size: 13px; color: var(--muted); margin-top: 8px; font-weight: 300; }
+  h1 span { color: var(--primary); font-weight: 700; }
+  .subtitle { font-size: 13px; color: var(--muted); margin-top: 6px; font-weight: 400; }
 
   /* ── Tabs ── */
   .tabs {
@@ -51,13 +88,13 @@
     border-bottom: 2px solid var(--border);
   }
   .tab-btn {
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    font-size: 13px; font-weight: 500;
     padding: 10px 22px; cursor: pointer; border: none; background: none;
-    color: var(--muted); position: relative; transition: color 0.15s;
+    color: var(--muted); position: relative; transition: color 0.15s, border-color 0.15s;
     border-bottom: 2px solid transparent; margin-bottom: -2px;
   }
   .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
@@ -66,41 +103,49 @@
     display: grid; grid-template-columns: repeat(auto-fill, minmax(148px,1fr));
     gap: 9px; margin-bottom: 22px;
   }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 16px; }
-  .stat-label { font-family: 'DM Mono',monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
-  .stat-value { font-family: 'Syne',sans-serif; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; color: var(--text); }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    transition: border-color 0.15s;
+  }
+  .stat-card:hover { border-color: var(--border-hover); }
+  .stat-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; font-weight: 500; }
+  .stat-value { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; color: var(--text); }
   .stat-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
   /* ── Toolbars ── */
-  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 10px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
   .toolbar-sep { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
-  .filter-label { font-family: 'DM Mono',monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .filter-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); white-space: nowrap; font-weight: 600; }
 
   .size-filters { display: flex; gap: 7px; align-items: center; }
   .size-btn {
     display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;
     cursor: pointer; user-select: none; padding: 5px 13px; border-radius: 20px;
     border: 1.5px solid var(--border); background: var(--surface); color: var(--text);
-    transition: all 0.15s; font-family: 'DM Sans',sans-serif;
+    transition: all 0.15s;
   }
-  .size-btn:hover { border-color: var(--muted); }
+  .size-btn:hover { border-color: var(--border-hover); color: #ffffff; }
   .size-btn .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .size-btn.off { opacity: 0.30; }
-  .size-btn.solo { font-weight: 700; }
+  .size-btn.off { opacity: 0.28; }
+  .size-btn.solo { font-weight: 700; border-color: currentColor; }
 
   .range-wrap { display: flex; gap: 10px; align-items: center; }
   .month-pills { display: flex; gap: 5px; flex-wrap: wrap; }
   .month-pill {
-    font-family: 'DM Mono',monospace; font-size: 11px; padding: 4px 10px;
+    font-size: 11px; padding: 5px 11px;
     border-radius: 14px; border: 1px solid var(--border); background: var(--surface);
     color: var(--muted); cursor: pointer; transition: all 0.15s; user-select: none;
+    font-weight: 500;
   }
-  .month-pill:hover { border-color: var(--muted); color: var(--text); }
-  .month-pill.active { background: var(--text); color: var(--surface); border-color: var(--text); font-weight: 500; }
-  .month-pill.all-pill.active { background: var(--muted); border-color: var(--muted); }
+  .month-pill:hover { border-color: var(--border-hover); color: var(--text); }
+  .month-pill.active { background: var(--primary); color: var(--primary-text); border-color: var(--primary); font-weight: 600; }
+  .month-pill.all-pill.active { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
 
   .pct-legend { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-left: auto; }
-  .pct-item { display: flex; align-items: center; gap: 7px; font-family: 'DM Mono',monospace; font-size: 12px; color: var(--muted); }
+  .pct-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
   .pct-line { width: 22px; height: 2px; border-radius: 1px; }
   .p50-line { background: var(--p50); }
   .p85-line { background: var(--p85); }
@@ -109,53 +154,71 @@
   /* ── Banners ── */
   .banner { display: none; align-items: center; gap: 12px; border-radius: 10px; padding: 9px 16px; margin-bottom: 12px; font-size: 13px; }
   .banner.visible { display: flex; }
-  .banner-restore { background: #fefce8; border: 1px solid #fde68a; color: #92400e; }
+  .banner-restore { background: rgba(250, 221, 16, 0.08); border: 1px solid rgba(250, 221, 16, 0.25); color: var(--primary); }
   .banner-btn {
-    margin-left: auto; font-family: 'DM Mono',monospace; font-size: 11px; letter-spacing: 0.06em;
-    cursor: pointer; padding: 4px 12px; border-radius: 14px; background: white; transition: background 0.15s; white-space: nowrap;
+    margin-left: auto; font-size: 11px; letter-spacing: 0.04em;
+    cursor: pointer; padding: 5px 14px; border-radius: 14px; border: none;
+    background: var(--primary); color: var(--primary-text); font-weight: 600;
+    transition: opacity 0.15s; white-space: nowrap;
   }
-  .banner-restore .banner-btn { border: 1px solid #fbbf24; color: #92400e; }
-  .banner-restore .banner-btn:hover { background: #fef9c3; }
+  .banner-btn:hover { opacity: 0.9; }
 
   /* ── Chart panels ── */
   .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 24px 18px; position: relative; margin-bottom: 16px; }
-  .chart-title { font-family: 'DM Mono',monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
-  svg text { font-family: 'DM Mono',monospace; }
+  .chart-title { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; font-weight: 600; }
+  .histogram-meta { font-size: 12px; color: var(--muted); margin: -10px 0 16px; }
+  .histogram-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
+  .histogram-legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); font-weight: 500; }
+  .histogram-swatch { width: 9px; height: 9px; border-radius: 50%; }
+  svg text { font-family: 'Poppins', sans-serif; }
 
   /* ── Add point panel ── */
   .add-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; }
   .add-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; }
-  .add-panel-title { font-family: 'DM Mono',monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .add-panel-title { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .add-toggle-btn {
-    font-family: 'DM Mono',monospace; font-size: 11px; letter-spacing: 0.06em; cursor: pointer;
-    padding: 4px 13px; border-radius: 14px; border: 1px solid var(--border);
-    background: transparent; color: var(--muted); transition: all 0.15s;
+    font-size: 11px; letter-spacing: 0.06em; cursor: pointer;
+    padding: 5px 14px; border-radius: 14px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); transition: all 0.15s; font-weight: 600;
   }
-  .add-toggle-btn:hover { border-color: var(--text); color: var(--text); }
-  .add-toggle-btn.open { background: var(--text); color: white; border-color: var(--text); }
+  .add-toggle-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .add-toggle-btn.open { background: var(--primary); color: var(--primary-text); border-color: var(--primary); }
   .add-form { display: none; margin-top: 18px; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
   .add-form.open { display: flex; }
   .form-field { display: flex; flex-direction: column; gap: 5px; }
-  .form-label { font-family: 'DM Mono',monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-  .form-input { font-family: 'DM Sans',sans-serif; font-size: 13px; padding: 7px 11px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
-  .form-input:focus { border-color: var(--text); background: white; }
-  .form-input::placeholder { color: var(--muted); }
+  .form-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .form-input {
+    font-size: 13px; padding: 8px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: #191c22; color: var(--text);
+    outline: none; transition: border-color 0.15s; color-scheme: dark;
+  }
+  .form-input:focus { border-color: var(--primary); }
+  .form-input::placeholder { color: #5f6672; }
   .size-radio-group { display: flex; gap: 7px; }
-  .size-radio { display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); transition: all 0.15s; user-select: none; }
-  .size-radio:hover { border-color: var(--muted); }
+  .size-radio {
+    display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;
+    padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: #191c22; color: var(--text); transition: all 0.15s; user-select: none;
+  }
+  .size-radio:hover { border-color: var(--border-hover); }
   .size-radio input { display: none; }
-  .size-radio.checked { background: white; font-weight: 600; }
+  .size-radio.checked { background: #232730; font-weight: 600; }
   .size-radio.checked-S { border-color: var(--small); color: var(--small); }
   .size-radio.checked-M { border-color: var(--medium); color: var(--medium); }
   .size-radio.checked-L { border-color: var(--large); color: var(--large); }
-  .add-btn { font-family: 'DM Sans',sans-serif; font-size: 13px; font-weight: 600; padding: 7px 20px; border-radius: 8px; border: none; background: var(--text); color: white; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
-  .add-btn:hover { opacity: 0.82; }
-  .form-err { font-size: 12px; color: var(--large); font-family: 'DM Mono',monospace; display: none; }
+  .add-btn {
+    font-size: 13px; font-weight: 600; padding: 8px 22px; border-radius: 8px;
+    border: none; background: var(--primary); color: var(--primary-text);
+    cursor: pointer; transition: opacity 0.15s, transform 0.1s; white-space: nowrap;
+  }
+  .add-btn:hover { opacity: 0.9; }
+  .add-btn:active { transform: scale(0.98); }
+  .form-err { font-size: 12px; color: var(--large); display: none; margin-top: 8px; }
   .form-err.show { display: block; }
 
   /* ── XMR specific ── */
   .xmr-legend { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
-  .xmr-leg-item { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono',monospace; font-size: 12px; color: var(--muted); }
+  .xmr-leg-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
   .xmr-leg-line { width: 24px; height: 2px; }
   .xmr-signal-box {
     display: inline-flex; align-items: center; justify-content: center;
@@ -165,35 +228,43 @@
 
   /* ── Tooltip ── */
   .tooltip {
-    position: fixed; background: var(--surface); border: 1px solid var(--border);
+    position: fixed; background: #181a20; border: 1px solid #2e333d;
     border-radius: 8px; padding: 10px 14px; pointer-events: none;
     z-index: 100; opacity: 0; transition: opacity 0.12s;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.10); min-width: 130px; max-width: 240px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.6); min-width: 130px; max-width: 240px;
   }
   .tooltip.visible { opacity: 1; }
-  .tt-date    { color: var(--muted); font-size: 11px; margin-bottom: 2px; font-family: 'DM Mono',monospace; }
-  .tt-size    { font-size: 11px; margin-bottom: 3px; font-weight: 500; }
-  .tt-val     { font-family: 'Syne',sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
+  .tt-date    { color: var(--muted); font-size: 11px; margin-bottom: 2px; }
+  .tt-size    { font-size: 11px; margin-bottom: 3px; font-weight: 600; }
+  .tt-val     { font-size: 22px; font-weight: 700; line-height: 1; }
   .tt-days    { color: var(--muted); font-size: 11px; margin-top: 1px; }
   .tt-comment { color: var(--text); font-size: 12px; margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--border); line-height: 1.4; }
-  .tt-hint    { color: var(--muted); font-size: 10px; margin-top: 6px; padding-top: 5px; border-top: 1px solid var(--border); font-family: 'DM Mono',monospace; }
+  .tt-hint    { color: var(--muted); font-size: 10px; margin-top: 6px; padding-top: 5px; border-top: 1px solid var(--border); }
   .tt-signal  { font-size: 11px; font-weight: 600; margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border); }
 
-  footer { text-align: center; font-family: 'DM Mono',monospace; font-size: 11px; color: var(--muted); margin-top: 20px; letter-spacing: 0.08em; }
+  footer { text-align: center; font-size: 11px; color: var(--muted); margin-top: 36px; letter-spacing: 0.08em; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="eyebrow">Delivery Analytics</div>
-  <h1>Cycle Times <span>2024/25</span></h1>
-  <p class="subtitle" id="subtitle">— items · cycle time in days</p>
+  <div class="header-container">
+    <div class="header-branding">
+      <img src="LAN_horizontal_color_on-dark-bg.png" alt="LeanAgile.ninja" class="brand-logo">
+      <div class="header-titles">
+        <div class="eyebrow">Delivery Analytics</div>
+        <h1>Cycle Times <span>2024/25</span></h1>
+        <p class="subtitle" id="subtitle">— items · cycle time in days</p>
+      </div>
+    </div>
+  </div>
 </header>
 
 <!-- ══ TABS ══ -->
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('lead')">Lead Times</button>
-  <button class="tab-btn"        onclick="switchTab('xmr')">XMR · Process Behaviour</button>
+  <button class="tab-btn active" data-tab="lead" onclick="switchTab('lead')">Lead Times</button>
+  <button class="tab-btn" data-tab="xmr" style="display:none;" onclick="switchTab('xmr')">XMR · Process Behaviour</button>
+  <button class="tab-btn" data-tab="histogram" onclick="switchTab('histogram')">Histogram</button>
 </div>
 
 <!-- ══════════════════════════════════════════════
@@ -267,7 +338,7 @@
 <!-- ══════════════════════════════════════════════
      TAB 2 — XMR
 ══════════════════════════════════════════════ -->
-<div class="tab-panel" id="tab-xmr">
+<div class="tab-panel" id="tab-xmr" style="display:none;">
 
   <div class="stats-row" id="xmrStatsRow"></div>
 
@@ -300,7 +371,34 @@
 
 </div><!-- /tab-xmr -->
 
-<footer>delivery_analytics · cycle_times_2024_25</footer>
+<!-- ══════════════════════════════════════════════
+     TAB 3 — LEAD TIME HISTOGRAM
+══════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-histogram">
+
+  <div class="toolbar">
+    <div class="size-filters">
+      <span class="filter-label">Size</span>
+      <button class="size-btn" id="hist-btn-S" onclick="toggleSize('S')"><span class="dot" style="background:var(--small)"></span>Small</button>
+      <button class="size-btn" id="hist-btn-M" onclick="toggleSize('M')"><span class="dot" style="background:var(--medium)"></span>Medium</button>
+      <button class="size-btn" id="hist-btn-L" onclick="toggleSize('L')"><span class="dot" style="background:var(--large)"></span>Large</button>
+    </div>
+    <div class="toolbar-sep"></div>
+    <div class="range-wrap">
+      <span class="filter-label">Last</span>
+      <div class="month-pills" id="histMonthPills"></div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">Lead time distribution</div>
+    <div class="histogram-meta" id="histogramMeta"></div>
+    <div class="histogram-legend" id="histogramLegend"></div>
+    <svg id="histogram" width="100%" style="display:block" role="img" aria-label="Histogram of lead times in days"></svg>
+  </div>
+</div><!-- /tab-histogram -->
+
+<footer>LeanAgile.ninja · Delivery Analytics · cycle_times_2024_25</footer>
 
 <!-- Shared tooltip -->
 <div class="tooltip" id="tooltip">
@@ -318,7 +416,7 @@
    SHARED UTILITIES
 ════════════════════════════════════════════════════ */
 const MONTHS_PL = {'Stycznia':0,'Lutego':1,'Marca':2,'Kwietnia':3,'Maja':4,'Czerwca':5,'Lipca':6,'Sierpnia':7,'Września':8,'Października':9,'Listopada':10,'Grudnia':11};
-const COLOR = {S:'#16a34a',M:'#ea6c0a',L:'#dc2626'};
+const COLOR = {S:'#22c55e',M:'#f97316',L:'#ef4444'};
 const LABEL = {S:'Small',M:'Medium',L:'Large'};
 const MON   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -331,10 +429,11 @@ function percentile(arr,p){ if(!arr.length)return 0; const s=[...arr].sort((a,b)
    TAB SWITCHING
 ════════════════════════════════════════════════════ */
 function switchTab(id) {
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active', ['lead','xmr'][i]===id));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id==='tab-'+id));
   if(id==='xmr') { renderXMR(); }
   if(id==='lead') { renderChart(); }
+  if(id==='histogram') { renderHistogram(); }
   document.getElementById('subtitle').textContent = id==='xmr'
     ? `${XMR_DATA.length} items · process behaviour chart`
     : buildSubtitle();
@@ -388,9 +487,13 @@ function visibleData(){
 /* ── Month pills ── */
 function buildMonthPills(){
   const opts=[{label:'All',val:0},...[3,4,6,9,12].map(m=>({label:m+'mo',val:m}))];
-  document.getElementById('monthPills').innerHTML=opts.map(o=>`
+  const html = opts.map(o=>`
     <div class="month-pill ${o.val===0?'all-pill':''} ${monthFilter===o.val?'active':''}"
       onclick="setMonthFilter(${o.val})">${o.label}</div>`).join('');
+  const p1 = document.getElementById('monthPills');
+  if(p1) p1.innerHTML = html;
+  const p2 = document.getElementById('histMonthPills');
+  if(p2) p2.innerHTML = html;
 }
 function setMonthFilter(m){ monthFilter=m; buildMonthPills(); refreshAll(); }
 
@@ -435,11 +538,14 @@ function renderPctLegend(){
 function refreshButtons(){
   const solo=soloSize();
   ['S','M','L'].forEach(s=>{
-    const btn=document.getElementById('btn-'+s);
-    btn.classList.toggle('off',!active[s]);
-    btn.classList.toggle('solo',!!solo&&active[s]&&solo===s);
-    if(active[s]&&solo===s){btn.style.color=COLOR[s];btn.style.borderColor=COLOR[s];}
-    else{btn.style.color='';btn.style.borderColor='';}
+    ['btn-'+s, 'hist-btn-'+s].forEach(id=>{
+      const btn=document.getElementById(id);
+      if(!btn) return;
+      btn.classList.toggle('off',!active[s]);
+      btn.classList.toggle('solo',!!solo&&active[s]&&solo===s);
+      if(active[s]&&solo===s){btn.style.color=COLOR[s];btn.style.borderColor=COLOR[s];}
+      else{btn.style.color='';btn.style.borderColor='';}
+    });
   });
 }
 
@@ -493,6 +599,18 @@ function showTip(e,d,xmrMeta){
   document.getElementById('tt-val').style.color=xmrMeta?(xmrMeta.signal?'var(--xmr-unpl)':'var(--xmr-line)'):(COLOR[d.size]);
   moveTip(e);
 }
+function showHistTip(e, sizeName, sizeKey, start, end, count){
+  tip.classList.add('visible');
+  document.getElementById('tt-date').textContent=`${start}–${end} days`;
+  document.getElementById('tt-size').textContent=`${sizeName} (${count} item${count===1?'':'s'})`;
+  document.getElementById('tt-size').style.color=COLOR[sizeKey]||'var(--text)';
+  document.getElementById('tt-val').textContent=count;
+  document.getElementById('tt-days').textContent=count===1?'item':'items';
+  document.getElementById('tt-hint').style.display='none';
+  document.getElementById('tt-signal').style.display='none';
+  document.getElementById('tt-comment').style.display='none';
+  moveTip(e);
+}
 function moveTip(e){ tip.style.left=(e.clientX+16)+'px'; tip.style.top=(e.clientY-60)+'px'; }
 function hideTip(){ tip.classList.remove('visible'); }
 
@@ -502,7 +620,7 @@ function removeDot(id){ hideTip(); removed.add(id); refreshAll(); }
 /* ── Lead time chart ── */
 function renderChart(){
   const svg=document.getElementById('chart');
-  const W=svg.parentElement.offsetWidth-48, H=420, PAD={top:14,right:82,bottom:44,left:48};
+  const W=Math.max(300, (svg.parentElement.offsetWidth || 800) - 48), H=420, PAD={top:14,right:82,bottom:44,left:48};
   const IW=W-PAD.left-PAD.right, IH=H-PAD.top-PAD.bottom;
   const allDays=ltData.map(d=>d.days), maxDays=Math.max(...allDays);
   const thresh=rangeThreshold();
@@ -518,39 +636,39 @@ function renderChart(){
   let grid='';
   [0,50,100,150,200,250,300,350,400].forEach(v=>{
     if(yV(v)<PAD.top-2)return;
-    grid+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${yV(v)}" y2="${yV(v)}" stroke="#ece9e2" stroke-width="1"/>`;
-    grid+=`<text x="${PAD.left-6}" y="${yV(v)+4}" fill="#b0ada6" font-size="10" text-anchor="end">${v}</text>`;
+    grid+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${yV(v)}" y2="${yV(v)}" stroke="#1f232b" stroke-width="1"/>`;
+    grid+=`<text x="${PAD.left-6}" y="${yV(v)+4}" fill="#717885" font-size="10" text-anchor="end">${v}</text>`;
   });
 
-  let xAxis=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${PAD.top+IH}" y2="${PAD.top+IH}" stroke="#d0cdc6" stroke-width="1"/>`;
+  let xAxis=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${PAD.top+IH}" y2="${PAD.top+IH}" stroke="#2b303b" stroke-width="1"/>`;
   const spanMonths=(maxDate-minDate)/(1000*60*60*24*30.44);
   const tickStep=spanMonths<=5?1:spanMonths<=12?2:3;
   let d=new Date(minDate.getFullYear(),minDate.getMonth(),1);
   while(d<=maxDate){
     const x=xT(d);
     if(x>=PAD.left-2&&x<=PAD.left+IW+2){
-      xAxis+=`<line x1="${x}" x2="${x}" y1="${PAD.top+IH}" y2="${PAD.top+IH+5}" stroke="#c0bdb6" stroke-width="1"/>`;
-      xAxis+=`<text x="${x}" y="${PAD.top+IH+17}" fill="#a09d96" font-size="10" text-anchor="middle">${MON[d.getMonth()]} '${String(d.getFullYear()).slice(2)}</text>`;
+      xAxis+=`<line x1="${x}" x2="${x}" y1="${PAD.top+IH}" y2="${PAD.top+IH+5}" stroke="#2b303b" stroke-width="1"/>`;
+      xAxis+=`<text x="${x}" y="${PAD.top+IH+17}" fill="#8a93a0" font-size="10" text-anchor="middle">${MON[d.getMonth()]} '${String(d.getFullYear()).slice(2)}</text>`;
     }
     d=new Date(d.getFullYear(),d.getMonth()+tickStep,1);
   }
 
   let rangeBg='';
-  if(thresh) rangeBg+=`<rect x="${PAD.left}" y="${PAD.top}" width="${IW}" height="${IH}" fill="#eff6ff" opacity="0.55"/>`;
+  if(thresh) rangeBg+=`<rect x="${PAD.left}" y="${PAD.top}" width="${IW}" height="${IH}" fill="rgba(250,221,16,0.06)" rx="2"/>`;
 
   const vis=visibleData(), solo=soloSize(), pVals=vis.map(d=>d.days);
   let pLines='';
   if(pVals.length){
     if(solo){
       const p85=percentile(pVals,85), y=yV(p85), col=COLOR[solo];
-      pLines+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}" stroke="${col}" stroke-width="2" opacity="0.7"/>
-        <rect x="${PAD.left+IW+3}" y="${y-9}" width="74" height="18" rx="4" fill="${col}" opacity="0.1"/>
+      pLines+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}" stroke="${col}" stroke-width="2" opacity="0.85"/>
+        <rect x="${PAD.left+IW+3}" y="${y-9}" width="74" height="18" rx="4" fill="#181a20" stroke="${col}" stroke-width="1"/>
         <text x="${PAD.left+IW+7}" y="${y+4}" fill="${col}" font-size="10.5" font-weight="600">P85 ${Math.round(p85)}d</text>`;
     } else {
-      [{val:percentile(pVals,50),color:'#7c3aed',dash:'',label:'P50'},{val:percentile(pVals,85),color:'#2563eb',dash:'',label:'P85'},{val:percentile(pVals,95),color:'#db2777',dash:'5,3',label:'P95'}].forEach(pl=>{
+      [{val:percentile(pVals,50),color:'#a855f7',dash:'',label:'P50'},{val:percentile(pVals,85),color:'#fadd10',dash:'',label:'P85'},{val:percentile(pVals,95),color:'#ec4899',dash:'5,3',label:'P95'}].forEach(pl=>{
         const y=yV(pl.val), da=pl.dash?`stroke-dasharray="${pl.dash}"`:'';
-        pLines+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}" stroke="${pl.color}" stroke-width="1.5" ${da} opacity="0.65"/>
-          <rect x="${PAD.left+IW+3}" y="${y-9}" width="74" height="18" rx="4" fill="${pl.color}" opacity="0.1"/>
+        pLines+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}" stroke="${pl.color}" stroke-width="1.5" ${da} opacity="0.75"/>
+          <rect x="${PAD.left+IW+3}" y="${y-9}" width="74" height="18" rx="4" fill="#181a20" stroke="${pl.color}" stroke-width="1"/>
           <text x="${PAD.left+IW+7}" y="${y+4}" fill="${pl.color}" font-size="10.5" font-weight="500">${pl.label} ${Math.round(pl.val)}d</text>`;
       });
     }
@@ -560,21 +678,105 @@ function renderChart(){
   plotData.forEach(item=>{
     if(!active[item.size]||!removed.has(item.id))return;
     const cx=xD(item),cy=yV(item.days);
-    dots+=`<circle cx="${cx}" cy="${cy}" r="5" fill="#c8c5be" opacity="0.30" stroke="white" stroke-width="1" style="cursor:default"/>`;
+    dots+=`<circle cx="${cx}" cy="${cy}" r="5" fill="#333842" opacity="0.35" stroke="#121418" stroke-width="1" style="cursor:default"/>`;
   });
   plotData.forEach(item=>{
     if(!active[item.size]||removed.has(item.id))return;
     const cx=xD(item), cy=yV(item.days), idx=ltData.indexOf(item), isNew=item.isNew;
-    const ring=isNew?`<circle cx="${cx}" cy="${cy}" r="9.5" fill="none" stroke="${COLOR[item.size]}" stroke-width="1" opacity="0.35" stroke-dasharray="3,2"/>`:'' ;
-    dots+=ring+`<circle cx="${cx}" cy="${cy}" r="6.5" fill="${COLOR[item.size]}" opacity="${isNew?'0.95':'0.82'}" stroke="white" stroke-width="${isNew?'2':'1.5'}" style="cursor:pointer;transition:r 0.1s,opacity 0.1s"
+    const ring=isNew?`<circle cx="${cx}" cy="${cy}" r="9.5" fill="none" stroke="${COLOR[item.size]}" stroke-width="1" opacity="0.45" stroke-dasharray="3,2"/>`:'' ;
+    dots+=ring+`<circle cx="${cx}" cy="${cy}" r="6.5" fill="${COLOR[item.size]}" opacity="${isNew?'0.98':'0.88'}" stroke="#121418" stroke-width="${isNew?'2':'1.5'}" style="cursor:pointer;transition:r 0.1s,opacity 0.1s"
       onmouseenter="this.setAttribute('r','8.5');this.style.opacity='1';showTip(event,ltData[${idx}],null)"
-      onmousemove="moveTip(event)" onmouseleave="this.setAttribute('r','6.5');this.style.opacity='${isNew?'0.95':'0.82'}';hideTip()"
+      onmousemove="moveTip(event)" onmouseleave="this.setAttribute('r','6.5');this.style.opacity='${isNew?'0.98':'0.88'}';hideTip()"
       onclick="removeDot(${item.id})"/>`;
   });
 
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   svg.setAttribute('height',H);
   svg.innerHTML=rangeBg+grid+xAxis+pLines+dots;
+}
+
+/* ── Lead time histogram ── */
+function renderHistogram(){
+  const svg=document.getElementById('histogram');
+  const W=Math.max(300, (svg.parentElement.offsetWidth || 800) - 48), H=420, PAD={top:18,right:20,bottom:54,left:48};
+  const IW=W-PAD.left-PAD.right, IH=H-PAD.top-PAD.bottom;
+  const vis=visibleData();
+  const legend=document.getElementById('histogramLegend');
+  const meta=document.getElementById('histogramMeta');
+  const sizes=activeSizes();
+
+  legend.innerHTML=sizes.map(s=>`
+    <div class="histogram-legend-item"><span class="histogram-swatch" style="background:${COLOR[s]}"></span>${LABEL[s]}</div>`).join('');
+
+  if(!vis.length){
+    meta.textContent='No items match the current filters.';
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    svg.setAttribute('height',H);
+    svg.setAttribute('aria-label','No lead time data matches the current filters');
+    svg.innerHTML=`<text x="${W/2}" y="${H/2}" fill="#717885" font-size="13" text-anchor="middle">No items to display</text>`;
+    return;
+  }
+
+  const values=vis.map(d=>d.days);
+  const binWidth=10;
+  const maxDay=Math.max(...values);
+  const binCount=Math.max(1,Math.ceil(maxDay/binWidth));
+  const bins=Array.from({length:binCount},(_,i)=>({
+    start:i*binWidth,
+    counts:{S:0,M:0,L:0}
+  }));
+  vis.forEach(item=>{
+    const index=Math.min(binCount-1,Math.floor(item.days/binWidth));
+    bins[index].counts[item.size]++;
+  });
+
+  const maxCount=Math.max(...bins.map(bin=>sizes.reduce((sum,s)=>sum+bin.counts[s],0)));
+  const yStep=Math.max(1,Math.ceil(maxCount/5));
+  const yMax=Math.ceil(maxCount/yStep)*yStep;
+  const xPos=i=>PAD.left+(i/binCount)*IW;
+  const yPos=count=>PAD.top+IH-(count/yMax)*IH;
+  const binPixelWidth=IW/binCount;
+  const barWidth=Math.max(1,binPixelWidth*0.75);
+  const barInset=(binPixelWidth-barWidth)/2;
+  const barRx=Math.min(2, Math.max(0, barWidth/3));
+  let grid='';
+  for(let count=0;count<=yMax;count+=yStep){
+    const y=yPos(count);
+    grid+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}" stroke="#1f232b" stroke-width="1"/>`;
+    grid+=`<text x="${PAD.left-7}" y="${y+4}" fill="#717885" font-size="10" text-anchor="end">${count}</text>`;
+  }
+
+  let bars='';
+  bins.forEach((bin,i)=>{
+    let total=0;
+    sizes.forEach(size=>{
+      const count=bin.counts[size];
+      if(!count)return;
+      const height=(count/yMax)*IH;
+      const y=yPos(total+count);
+      bars+=`<rect x="${xPos(i)+barInset}" y="${y}" width="${barWidth}" height="${height}" fill="${COLOR[size]}" opacity="0.9" rx="${barRx}" stroke="#121418" stroke-width="${binPixelWidth > 6 ? 0.5 : 0}" style="cursor:pointer;transition:opacity 0.1s"
+        onmouseenter="this.style.opacity='1';showHistTip(event, '${LABEL[size]}', '${size}', ${bin.start}, ${bin.start+binWidth}, ${count})"
+        onmousemove="moveTip(event)"
+        onmouseleave="this.style.opacity='0.9';hideTip()"><title>${bin.start}–${bin.start+binWidth} days: ${LABEL[size]} ${count}</title></rect>`;
+      total+=count;
+    });
+  });
+
+  let xAxis=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${PAD.top+IH}" y2="${PAD.top+IH}" stroke="#2b303b" stroke-width="1"/>`;
+  const labelStep = binCount <= 10 ? 1 : binCount <= 20 ? 2 : binCount <= 50 ? 5 : 10;
+  for(let i=0; i<=binCount; i+=labelStep){
+    const x=xPos(i);
+    const dayVal=i*binWidth;
+    xAxis+=`<line x1="${x}" x2="${x}" y1="${PAD.top+IH}" y2="${PAD.top+IH+4}" stroke="#2b303b" stroke-width="1"/>`;
+    xAxis+=`<text x="${x}" y="${PAD.top+IH+16}" fill="#8a93a0" font-size="9.5" text-anchor="middle">${dayVal}</text>`;
+  }
+  xAxis+=`<text x="${PAD.left+IW/2}" y="${H-8}" fill="#9da5b4" font-size="10" text-anchor="middle">Lead time (days)</text>`;
+
+  meta.textContent=`${vis.length} visible item${vis.length===1?'':'s'} · ${binWidth} days per bin`;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('height',H);
+  svg.setAttribute('aria-label',`Lead time histogram showing ${vis.length} items in ${binCount} bins`);
+  svg.innerHTML=grid+xAxis+bars;
 }
 
 /* ── Size toggle ── */
@@ -621,6 +823,7 @@ function showErr(msg){const el=document.getElementById('formErr');el.textContent
 function refreshAll(){
   refreshButtons(); renderPctLegend(); renderStats();
   refreshChartTitle(); renderChart(); refreshRestoreBar(); refreshSubtitle();
+  if(document.getElementById('tab-histogram').classList.contains('active')) renderHistogram();
 }
 
 /* ════════════════════════════════════════════════════
@@ -711,7 +914,7 @@ function renderXMR(){
 
 function drawXChart(){
   const svg = document.getElementById('xmrXChart');
-  const W   = svg.parentElement.offsetWidth - 48;
+  const W   = Math.max(300, (svg.parentElement.offsetWidth || 800) - 48);
   const H   = 380;
   const PAD = {top:16, right:82, bottom:44, left:52};
   const IW  = W - PAD.left - PAD.right;
@@ -733,19 +936,19 @@ function drawXChart(){
   for(let v=0; v<=yMax; v+=yStep){
     const y=yPos(v);
     if(y<PAD.top-2)continue;
-    grid+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}" stroke="#ece9e2" stroke-width="1"/>`;
-    grid+=`<text x="${PAD.left-6}" y="${y+4}" fill="#b0ada6" font-size="10" text-anchor="end">${v}</text>`;
+    grid+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}" stroke="#1f232b" stroke-width="1"/>`;
+    grid+=`<text x="${PAD.left-6}" y="${y+4}" fill="#717885" font-size="10" text-anchor="end">${v}</text>`;
   }
 
   // X axis labels (dates)
-  let xAxis = `<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${PAD.top+IH}" y2="${PAD.top+IH}" stroke="#d0cdc6" stroke-width="1"/>`;
+  let xAxis = `<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${PAD.top+IH}" y2="${PAD.top+IH}" stroke="#2b303b" stroke-width="1"/>`;
   // show every ~5th point label to avoid crowding
   const labelStep = Math.ceil(n / 12);
   XMR_DATA.forEach((pt,i)=>{
     if(i%labelStep!==0&&i!==n-1)return;
     const x=xPos(i);
-    xAxis+=`<line x1="${x}" x2="${x}" y1="${PAD.top+IH}" y2="${PAD.top+IH+5}" stroke="#c0bdb6" stroke-width="1"/>`;
-    xAxis+=`<text x="${x}" y="${PAD.top+IH+17}" fill="#a09d96" font-size="9.5" text-anchor="middle">${MON[pt.closed.getMonth()]} ${String(pt.closed.getDate()).padStart(2,'0')}</text>`;
+    xAxis+=`<line x1="${x}" x2="${x}" y1="${PAD.top+IH}" y2="${PAD.top+IH+5}" stroke="#2b303b" stroke-width="1"/>`;
+    xAxis+=`<text x="${x}" y="${PAD.top+IH+17}" fill="#8a93a0" font-size="9.5" text-anchor="middle">${MON[pt.closed.getMonth()]} ${String(pt.closed.getDate()).padStart(2,'0')}</text>`;
   });
 
   // Signal highlights (background band for signal points)
@@ -753,44 +956,44 @@ function drawXChart(){
   signals.forEach((s,i)=>{
     if(!s)return;
     const x=xPos(i);
-    sigBg+=`<rect x="${x-12}" y="${PAD.top}" width="24" height="${IH}" fill="rgba(220,38,38,0.08)" rx="3"/>`;
+    sigBg+=`<rect x="${x-12}" y="${PAD.top}" width="24" height="${IH}" fill="rgba(239,68,68,0.18)" rx="3"/>`;
   });
 
   // Control limit lines
   const uclY=yPos(xUCL), lclY=yPos(xLCL), avgY=yPos(mean);
   const limitLines = `
-    <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${uclY}" y2="${uclY}" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.7"/>
-    <rect x="${PAD.left+IW+3}" y="${uclY-9}" width="72" height="18" rx="4" fill="#dc2626" opacity="0.08"/>
-    <text x="${PAD.left+IW+7}" y="${uclY+4}" fill="#dc2626" font-size="10.5" font-weight="500">UCL ${xUCL.toFixed(1)}</text>
+    <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${uclY}" y2="${uclY}" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.8"/>
+    <rect x="${PAD.left+IW+3}" y="${uclY-9}" width="72" height="18" rx="4" fill="#181a20" stroke="#ef4444" stroke-width="1"/>
+    <text x="${PAD.left+IW+7}" y="${uclY+4}" fill="#ef4444" font-size="10.5" font-weight="500">UCL ${xUCL.toFixed(1)}</text>
 
-    <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${avgY}" y2="${avgY}" stroke="#2563eb" stroke-width="2" opacity="0.75"/>
-    <rect x="${PAD.left+IW+3}" y="${avgY-9}" width="72" height="18" rx="4" fill="#2563eb" opacity="0.08"/>
-    <text x="${PAD.left+IW+7}" y="${avgY+4}" fill="#2563eb" font-size="10.5" font-weight="600">X̄  ${mean.toFixed(1)}</text>
+    <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${avgY}" y2="${avgY}" stroke="#3b82f6" stroke-width="2" opacity="0.85"/>
+    <rect x="${PAD.left+IW+3}" y="${avgY-9}" width="72" height="18" rx="4" fill="#181a20" stroke="#3b82f6" stroke-width="1"/>
+    <text x="${PAD.left+IW+7}" y="${avgY+4}" fill="#3b82f6" font-size="10.5" font-weight="600">X̄  ${mean.toFixed(1)}</text>
 
     ${xLCL > 0 ? `
-    <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${lclY}" y2="${lclY}" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.7"/>
-    <rect x="${PAD.left+IW+3}" y="${lclY-9}" width="72" height="18" rx="4" fill="#dc2626" opacity="0.08"/>
-    <text x="${PAD.left+IW+7}" y="${lclY+4}" fill="#dc2626" font-size="10.5" font-weight="500">LCL ${xLCL.toFixed(1)}</text>
-    ` : `<text x="${PAD.left+IW+7}" y="${yPos(0)+4}" fill="#b0ada6" font-size="9.5">LCL=0</text>`}
+    <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${lclY}" y2="${lclY}" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.8"/>
+    <rect x="${PAD.left+IW+3}" y="${lclY-9}" width="72" height="18" rx="4" fill="#181a20" stroke="#ef4444" stroke-width="1"/>
+    <text x="${PAD.left+IW+7}" y="${lclY+4}" fill="#ef4444" font-size="10.5" font-weight="500">LCL ${xLCL.toFixed(1)}</text>
+    ` : `<text x="${PAD.left+IW+7}" y="${yPos(0)+4}" fill="#717885" font-size="9.5">LCL=0</text>`}
   `;
 
   // Connecting line
   let line='<polyline points="';
   XMR_DATA.forEach((pt,i)=>{ line+=`${xPos(i)},${yPos(pt.days)} `; });
-  line+=`" fill="none" stroke="#1a1a1a" stroke-width="1.5" opacity="0.55" stroke-linejoin="round"/>`;
+  line+=`" fill="none" stroke="#94a3b8" stroke-width="1.5" opacity="0.6" stroke-linejoin="round"/>`;
 
   // Dots
   let dots='';
   XMR_DATA.forEach((pt,i)=>{
     const cx=xPos(i), cy=yPos(pt.days), isSig=signals[i];
-    const fill  = isSig ? '#dc2626' : '#1a1a1a';
+    const fill  = isSig ? '#ef4444' : '#cbd5e1';
     const r     = isSig ? 6 : 5;
-    const stroke= isSig ? 'white' : 'white';
+    const stroke= '#121418';
     const meta  = {signal:isSig};
-    dots+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" opacity="${isSig?'0.9':'0.7'}"
+    dots+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" opacity="${isSig?'0.95':'0.8'}"
       stroke="${stroke}" stroke-width="1.5" style="cursor:pointer;transition:r 0.1s"
       onmouseenter="this.setAttribute('r','${r+2}');this.style.opacity='1';showTip(event,{id:${pt.id},dateObj:new Date(${pt.closed.getTime()}),days:${pt.days}},{signal:${isSig}})"
-      onmousemove="moveTip(event)" onmouseleave="this.setAttribute('r','${r}');this.style.opacity='${isSig?'0.9':'0.7'}';hideTip()"/>`;
+      onmousemove="moveTip(event)" onmouseleave="this.setAttribute('r','${r}');this.style.opacity='${isSig?'0.95':'0.8'}';hideTip()"/>`;
   });
 
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
@@ -800,7 +1003,7 @@ function drawXChart(){
 
 function drawMRChart(){
   const svg = document.getElementById('xmrMRChart');
-  const W   = svg.parentElement.offsetWidth - 48;
+  const W   = Math.max(300, (svg.parentElement.offsetWidth || 800) - 48);
   const H   = 240;
   const PAD = {top:14, right:82, bottom:44, left:52};
   const IW  = W - PAD.left - PAD.right;
@@ -819,35 +1022,35 @@ function drawMRChart(){
   for(let v=0;v<=yMax;v+=yStep){
     const y=yPos(v);
     if(y<PAD.top-2)continue;
-    grid+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}" stroke="#ece9e2" stroke-width="1"/>`;
-    grid+=`<text x="${PAD.left-6}" y="${y+4}" fill="#b0ada6" font-size="10" text-anchor="end">${v}</text>`;
+    grid+=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${y}" y2="${y}" stroke="#1f232b" stroke-width="1"/>`;
+    grid+=`<text x="${PAD.left-6}" y="${y+4}" fill="#717885" font-size="10" text-anchor="end">${v}</text>`;
   }
 
   // X axis
-  let xAxis=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${PAD.top+IH}" y2="${PAD.top+IH}" stroke="#d0cdc6" stroke-width="1"/>`;
+  let xAxis=`<line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${PAD.top+IH}" y2="${PAD.top+IH}" stroke="#2b303b" stroke-width="1"/>`;
   const labelStep=Math.ceil((n-1)/12);
   mr.forEach((_,i)=>{
     if(i%labelStep!==0&&i!==mr.length-1)return;
     const x=xPos(i);
     const pt=XMR_DATA[i+1];
-    xAxis+=`<line x1="${x}" x2="${x}" y1="${PAD.top+IH}" y2="${PAD.top+IH+5}" stroke="#c0bdb6" stroke-width="1"/>`;
-    xAxis+=`<text x="${x}" y="${PAD.top+IH+17}" fill="#a09d96" font-size="9.5" text-anchor="middle">${MON[pt.closed.getMonth()]} ${String(pt.closed.getDate()).padStart(2,'0')}</text>`;
+    xAxis+=`<line x1="${x}" x2="${x}" y1="${PAD.top+IH}" y2="${PAD.top+IH+5}" stroke="#2b303b" stroke-width="1"/>`;
+    xAxis+=`<text x="${x}" y="${PAD.top+IH+17}" fill="#8a93a0" font-size="9.5" text-anchor="middle">${MON[pt.closed.getMonth()]} ${String(pt.closed.getDate()).padStart(2,'0')}</text>`;
   });
 
   // UCL / mean lines
   const uclY=yPos(mrUCL), avgY=yPos(mrMean);
   const limitLines=`
-    <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${uclY}" y2="${uclY}" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.7"/>
-    <rect x="${PAD.left+IW+3}" y="${uclY-9}" width="72" height="18" rx="4" fill="#dc2626" opacity="0.08"/>
-    <text x="${PAD.left+IW+7}" y="${uclY+4}" fill="#dc2626" font-size="10.5" font-weight="500">UCL ${mrUCL.toFixed(1)}</text>
-    <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${avgY}" y2="${avgY}" stroke="#2563eb" stroke-width="2" opacity="0.75"/>
-    <rect x="${PAD.left+IW+3}" y="${avgY-9}" width="72" height="18" rx="4" fill="#2563eb" opacity="0.08"/>
-    <text x="${PAD.left+IW+7}" y="${avgY+4}" fill="#2563eb" font-size="10.5" font-weight="600">R̄  ${mrMean.toFixed(1)}</text>
+    <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${uclY}" y2="${uclY}" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.8"/>
+    <rect x="${PAD.left+IW+3}" y="${uclY-9}" width="72" height="18" rx="4" fill="#181a20" stroke="#ef4444" stroke-width="1"/>
+    <text x="${PAD.left+IW+7}" y="${uclY+4}" fill="#ef4444" font-size="10.5" font-weight="500">UCL ${mrUCL.toFixed(1)}</text>
+    <line x1="${PAD.left}" x2="${PAD.left+IW}" y1="${avgY}" y2="${avgY}" stroke="#3b82f6" stroke-width="2" opacity="0.85"/>
+    <rect x="${PAD.left+IW+3}" y="${avgY-9}" width="72" height="18" rx="4" fill="#181a20" stroke="#3b82f6" stroke-width="1"/>
+    <text x="${PAD.left+IW+7}" y="${avgY+4}" fill="#3b82f6" font-size="10.5" font-weight="600">R̄  ${mrMean.toFixed(1)}</text>
   `;
 
   // Signal highlights in MR
   let sigBg='';
-  mr.forEach((v,i)=>{ if(v>mrUCL) sigBg+=`<rect x="${xPos(i)-12}" y="${PAD.top}" width="24" height="${IH}" fill="rgba(220,38,38,0.08)" rx="3"/>`; });
+  mr.forEach((v,i)=>{ if(v>mrUCL) sigBg+=`<rect x="${xPos(i)-12}" y="${PAD.top}" width="24" height="${IH}" fill="rgba(239,68,68,0.18)" rx="3"/>`; });
 
   // Line
   let line='<polyline points="';
@@ -858,12 +1061,12 @@ function drawMRChart(){
   let dots='';
   mr.forEach((v,i)=>{
     const cx=xPos(i), cy=yPos(v), isSig=v>mrUCL;
-    const fill=isSig?'#dc2626':'#64748b';
+    const fill=isSig?'#ef4444':'#64748b';
     const pt=XMR_DATA[i+1];
-    dots+=`<circle cx="${cx}" cy="${cy}" r="${isSig?6:4}" fill="${fill}" opacity="${isSig?'0.9':'0.65'}"
-      stroke="white" stroke-width="1.5" style="cursor:pointer;transition:r 0.1s"
+    dots+=`<circle cx="${cx}" cy="${cy}" r="${isSig?6:4}" fill="${fill}" opacity="${isSig?'0.95':'0.75'}"
+      stroke="#121418" stroke-width="1.5" style="cursor:pointer;transition:r 0.1s"
       onmouseenter="this.setAttribute('r','${isSig?8:6}');this.style.opacity='1';showTip(event,{id:${pt.id},dateObj:new Date(${pt.closed.getTime()}),days:${v}},{signal:${isSig}})"
-      onmousemove="moveTip(event)" onmouseleave="this.setAttribute('r','${isSig?6:4}');this.style.opacity='${isSig?'0.9':'0.65'}';hideTip()"/>`;
+      onmousemove="moveTip(event)" onmouseleave="this.setAttribute('r','${isSig?6:4}');this.style.opacity='${isSig?'0.95':'0.75'}';hideTip()"/>`;
   });
 
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
@@ -879,6 +1082,7 @@ refreshAll();
 window.addEventListener('resize', ()=>{
   renderChart();
   if(document.getElementById('tab-xmr').classList.contains('active')) renderXMR();
+  if(document.getElementById('tab-histogram').classList.contains('active')) renderHistogram();
 });
 </script>
 </body>
